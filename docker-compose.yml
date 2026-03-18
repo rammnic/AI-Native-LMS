@@ -47,6 +47,8 @@ services:
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
     ports:
       - "8000:8000"
+    volumes:
+      - C:/DevOps/VS_Code_Projects/ai_backend_framework/ai-backend-framework/pipelines:/app/pipelines
     restart: unless-stopped
 
   # Frontend (Next.js)

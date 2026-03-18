@@ -4,10 +4,11 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Sparkles, Loader2 } from "lucide-react";
-import { authApi } from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login, register } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -23,9 +24,9 @@ export default function LoginPage() {
 
     try {
       if (isLogin) {
-        await authApi.login(email, password);
+        await login(email, password);
       } else {
-        await authApi.register(email, password, name);
+        await register(email, password, name);
       }
       router.push("/dashboard");
     } catch (err) {

@@ -4,6 +4,7 @@ FastAPI application with PostgreSQL and JWT auth.
 """
 
 import os
+import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,16 +12,26 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api import auth, courses, progress, ai_proxy
 from app.db.database import init_db
 
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+logger = logging.getLogger(__name__)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Lifecycle manager for startup and shutdown events."""
     # Startup - initialize database
+    logger.info("Starting AI-Native LMS API...")
     await init_db()
-    print("Application started successfully!")
+    logger.info("Database initialized successfully!")
+    logger.info("Application started successfully!")
     yield
     # Shutdown
-    print("Application shutting down...")
+    logger.info("Application shutting down...")
 
 
 app = FastAPI(
@@ -44,6 +55,8 @@ app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
 app.include_router(courses.router, prefix="/api/v1/courses", tags=["courses"])
 app.include_router(progress.router, prefix="/api/v1/progress", tags=["progress"])
 app.include_router(ai_proxy.router, prefix="/api/v1/ai", tags=["ai"])
+
+logger.info("All routes registered successfully")
 
 
 @app.get("/")

@@ -35,8 +35,12 @@ export default function DashboardPage() {
     }
     if (isAuthenticated) {
       fetchData();
+    } else if (!loading) {
+      // User is not authenticated and AuthContext has finished loading
+      // Set loading to false to avoid infinite spinner
+      setLoading(false);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, loading]);
 
   const handleLogout = () => {
     logout();

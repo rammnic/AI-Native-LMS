@@ -4,6 +4,7 @@ Handles AI integration with mock/real toggle via AI_MOCK_ENABLED env variable.
 """
 
 import os
+import logging
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException
@@ -11,9 +12,12 @@ from pydantic import BaseModel
 import httpx
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 AI_API_URL = os.getenv("AI_API_URL", "http://localhost:8000")
 AI_MOCK_ENABLED = os.getenv("AI_MOCK_ENABLED", "true").lower() == "true"
+
+logger.info(f"AI Proxy initialized: mock_enabled={AI_MOCK_ENABLED}, api_url={AI_API_URL}")
 
 
 class CourseOutlineRequest(BaseModel):
@@ -92,8 +96,13 @@ MOCK_CHAT_RESPONSE = {
 
 @router.post("/generate/structure")
 async def generate_course_structure(request: CourseOutlineRequest):
+    logger.info(f"generate_course_structure called with: {request.model_dump()}")
+    
     if AI_MOCK_ENABLED:
+        logger.info("Using MOCK_COURSE_OUTLINE")
+        logger.info(f"Mock data structure: {MOCK_COURSE_OUTLINE['data'].get('structure')}")
         return MOCK_COURSE_OUTLINE
+    
     try:
         async with httpx.AsyncClient() as client:
             response = await client.post(
@@ -102,8 +111,11 @@ async def generate_course_structure(request: CourseOutlineRequest):
                 timeout=30.0,
             )
             response.raise_for_status()
-            return response.json()
+            result = response.json()
+            logger.info(f"AI response: {result}")
+            return result
     except Exception as e:
+        logger.error(f"AI service error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"AI service error: {str(e)}")
 
 

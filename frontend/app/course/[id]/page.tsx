@@ -4,31 +4,87 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ChevronRight, BookOpen, FileText, Code, Sparkles, ArrowLeft } from "lucide-react";
-import { coursesApi, CourseNode } from "@/lib/api";
+import { coursesApi, aiApi, CourseNode } from "@/lib/api";
 
 export default function CoursePage() {
   const params = useParams();
   const courseId = params.id as string;
   const [course, setCourse] = useState<{ id: string; title: string; description: string; nodes: CourseNode[] } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
 
-  useEffect(() => {
-    async function fetchCourse() {
-      try {
-        const data = await coursesApi.getById(courseId);
-        setCourse(data);
-        if (data.nodes.length > 0) {
-          setExpandedNodes(new Set(data.nodes.map((n: CourseNode) => n.id)));
-        }
-      } catch (error) {
-        console.error("Error fetching course:", error);
-      } finally {
-        setLoading(false);
+  const fetchCourse = async () => {
+    try {
+      const data = await coursesApi.getById(courseId);
+      setCourse(data);
+      if (data.nodes.length > 0) {
+        setExpandedNodes(new Set(data.nodes.map((n: CourseNode) => n.id)));
       }
+    } catch (error) {
+      console.error("Error fetching course:", error);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
     if (courseId) fetchCourse();
   }, [courseId]);
+
+  const handleGenerateStructure = async () => {
+    setGenerating(true);
+    try {
+      // Generate new structure via AI
+      const result = await aiApi.generateStructure({
+        user_prompt: `Expand course: ${course?.title}`,
+        difficulty: "intermediate",
+        depth_limit: 3,
+        user_id: "demo-user-1",
+      });
+
+      if (result.success) {
+        const data = result.data as { 
+          structure?: Array<{ id: string; title: string; type: string; children?: Array<{ id: string; title: string; type: string; content: unknown }> }>;
+        };
+        
+        if (data.structure && data.structure.length > 0) {
+          // Flatten structure and save nodes - include generated UUIDs
+          const flattenStructure = (
+            structure: Array<{ id: string; title: string; type: string; children?: Array<{ id: string; title: string; type: string; content: unknown }> }>,
+            parentId: string | null = null,
+            nodes: Array<{ id: string; title: string; type: "topic" | "theory" | "practice"; parent_id: string | null }> = []
+          ): Array<{ id: string; title: string; type: "topic" | "theory" | "practice"; parent_id: string | null }> => {
+            structure.forEach((item) => {
+              const newId = crypto.randomUUID();
+              nodes.push({
+                id: newId,
+                title: item.title,
+                type: item.type as "topic" | "theory" | "practice",
+                parent_id: parentId,
+              });
+              if (item.children && item.children.length > 0) {
+                flattenStructure(item.children, newId, nodes);
+              }
+            });
+            return nodes;
+          };
+
+          const nodesToCreate = flattenStructure(data.structure);
+          if (nodesToCreate.length > 0) {
+            await coursesApi.createNodes(courseId, nodesToCreate);
+          }
+        }
+        
+        // Refresh course data
+        await fetchCourse();
+      }
+    } catch (error) {
+      console.error("Error generating structure:", error);
+    } finally {
+      setGenerating(false);
+    }
+  };
 
   const toggleNode = (nodeId: string) => {
     setExpandedNodes((prev) => {
@@ -103,7 +159,18 @@ export default function CoursePage() {
             <Link href="/dashboard" className="p-2 hover:bg-slate-800 rounded-lg"><ArrowLeft className="w-5 h-5 text-slate-400" /></Link>
             <div><h1 className="text-lg font-semibold">{course.title}</h1><p className="text-sm text-slate-400">{course.description}</p></div>
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 rounded-lg font-medium"><Sparkles className="w-4 h-4" />Generate More</button>
+          <button 
+            onClick={handleGenerateStructure}
+            disabled={generating}
+            className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 rounded-lg font-medium disabled:opacity-50"
+          >
+            {generating ? (
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Sparkles className="w-4 h-4" />
+            )}
+            Generate More
+          </button>
         </div>
       </header>
       <main className="container mx-auto px-6 py-8">
@@ -113,7 +180,20 @@ export default function CoursePage() {
             <div className="text-center py-12">
               <BookOpen className="w-12 h-12 text-slate-600 mx-auto mb-4" />
               <p className="text-slate-400 mb-4">No content yet</p>
-              <button className="px-6 py-3 bg-violet-600 hover:bg-violet-700 rounded-xl font-medium">Generate Course Structure</button>
+              <button 
+                onClick={handleGenerateStructure}
+                disabled={generating}
+                className="px-6 py-3 bg-violet-600 hover:bg-violet-700 rounded-xl font-medium disabled:opacity-50"
+              >
+                {generating ? (
+                  <>
+                    <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" />
+                    Generating...
+                  </>
+                ) : (
+                  "Generate Course Structure"
+                )}
+              </button>
             </div>
           )}
         </div>

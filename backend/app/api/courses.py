@@ -4,6 +4,7 @@ Handles course CRUD operations with PostgreSQL.
 """
 
 import uuid
+import logging
 from datetime import datetime
 from typing import List, Optional
 
@@ -17,16 +18,18 @@ from app.api.auth import get_current_user, UserResponse
 from app.db.database import get_db
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 # Pydantic models
 class CourseCreate(BaseModel):
     title: str
-    description: str = ""
+    description: Optional[str] = ""
     settings: dict = {}
 
 
 class CourseNodeCreate(BaseModel):
+    id: Optional[uuid.UUID] = None  # Allow frontend to provide UUID
     title: str
     type: str  # topic, theory, practice
     parent_id: Optional[uuid.UUID] = None
@@ -251,3 +254,82 @@ async def create_node(
     await db.refresh(new_node)
 
     return node_to_response(new_node)
+
+
+class CourseNodeBatchCreate(BaseModel):
+    """Batch create nodes request."""
+    nodes: list[CourseNodeCreate]
+
+
+class CourseNodeBatchResponse(BaseModel):
+    """Batch create nodes response."""
+    nodes: list[CourseNodeResponse]
+    created_count: int
+
+
+@router.post("/{course_id}/nodes/batch", response_model=CourseNodeBatchResponse, status_code=status.HTTP_201_CREATED)
+async def create_nodes_batch(
+    course_id: str,
+    batch_data: CourseNodeBatchCreate,
+    current_user: UserResponse = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Add multiple nodes to a course at once."""
+    from app.db.schema import Course, Node
+
+    logger.info(f"Batch create nodes request for course {course_id}")
+    logger.info(f"Nodes to create: {len(batch_data.nodes)}")
+    for i, node in enumerate(batch_data.nodes):
+        logger.info(f"  Node {i}: id={node.id}, title={node.title}, type={node.type}, parent_id={node.parent_id}")
+
+    # Verify course exists and user owns it
+    result = await db.execute(
+        select(Course).where(Course.id == uuid.UUID(course_id))
+    )
+    course = result.scalar_one_or_none()
+
+    if not course:
+        logger.warning(f"Course not found: {course_id}")
+        raise HTTPException(status_code=404, detail="Course not found")
+
+    if str(course.author_id) != current_user.id:
+        logger.warning(f"User {current_user.id} not authorized for course {course_id}")
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    # Create nodes - use provided id or generate new one
+    created_nodes = []
+    node_id_map = {}  # Map frontend id to actual DB id
+
+    for idx, node_data in enumerate(batch_data.nodes):
+        # Use provided UUID or generate new one
+        node_id = node_data.id if node_data.id else uuid.uuid4()
+        
+        new_node = Node(
+            id=node_id,
+            course_id=uuid.UUID(course_id),
+            parent_id=node_data.parent_id,
+            title=node_data.title,
+            type=node_data.type,
+            order_index=node_data.order_index if node_data.order_index > 0 else idx,
+            content_status="pending",
+        )
+        db.add(new_node)
+        created_nodes.append(new_node)
+        
+        # Track the mapping if frontend provided an id
+        if node_data.id:
+            node_id_map[str(node_data.id)] = node_id
+            logger.info(f"Created node with frontend id {node_data.id} -> DB id {node_id}")
+
+    await db.commit()
+    logger.info(f"Created {len(created_nodes)} nodes in database")
+
+    # Refresh all nodes to get their IDs
+    for node in created_nodes:
+        await db.refresh(node)
+
+    logger.info(f"Batch create completed successfully")
+    return CourseNodeBatchResponse(
+        nodes=[node_to_response(n) for n in created_nodes],
+        created_count=len(created_nodes),
+    )

@@ -294,6 +294,7 @@ POST /api/v1/ai/generate/structure
 | POST | /api/v1/courses | Создать курс |
 | GET | /api/v1/courses/:id | Детали курса |
 | DELETE | /api/v1/courses/:id | Удалить курс |
+| POST | /api/v1/courses/:id/nodes/batch | Создать несколько нод |
 
 ### Progress
 | Метод | Путь | Описание |

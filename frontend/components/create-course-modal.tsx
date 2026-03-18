@@ -22,6 +22,33 @@ export function CreateCourseModal({ open, onOpenChange, onCourseCreated }: Creat
   const [step, setStep] = useState<"input" | "generating" | "success">("input")
   const [generatedCourseId, setGeneratedCourseId] = useState<string | null>(null)
 
+  // Helper function to flatten AI structure to nodes with parent_id mapping
+  const flattenStructure = (
+    structure: Array<{ id: string; title: string; type: string; children?: Array<{ id: string; title: string; type: string; content: unknown }> }>,
+    parentId: string | null = null,
+    nodes: Array<{ id: string; title: string; type: "topic" | "theory" | "practice"; parent_id: string | null }> = [],
+    idMap: Map<string, string> = new Map()
+  ): Array<{ id: string; title: string; type: "topic" | "theory" | "practice"; parent_id: string | null }> => {
+    structure.forEach((item) => {
+      // Generate new UUID for each node
+      const newId = crypto.randomUUID();
+      idMap.set(item.id, newId);
+      
+      // Include the generated id so backend uses it
+      nodes.push({
+        id: newId,
+        title: item.title,
+        type: item.type as "topic" | "theory" | "practice",
+        parent_id: parentId,
+      });
+
+      if (item.children && item.children.length > 0) {
+        flattenStructure(item.children, newId, nodes, idMap);
+      }
+    });
+    return nodes;
+  };
+
   const handleSubmit = async () => {
     if (!prompt.trim()) return
 
@@ -38,14 +65,33 @@ export function CreateCourseModal({ open, onOpenChange, onCourseCreated }: Creat
       })
 
       if (result.success) {
-        const data = result.data as { course_title: string; course_description: string }
+        const data = result.data as { 
+          course_title?: string; 
+          course_description?: string;
+          structure?: Array<{ id: string; title: string; type: string; children?: Array<{ id: string; title: string; type: string; content: unknown }> }>;
+        }
+        
+        console.log("AI result:", result);
+        console.log("AI data:", data);
+        console.log("Structure:", data?.structure);
         
         // Create course in DB
         const course = await coursesApi.create(
-          data.course_title,
-          data.course_description,
+          data.course_title || "Untitled Course",
+          data.course_description || "",
           { difficulty, depth_limit: parseInt(depthLimit) }
         )
+        console.log("Course created:", course);
+
+        // If AI returned structure, save nodes to the course
+        if (data.structure && data.structure.length > 0) {
+          const nodesToCreate = flattenStructure(data.structure);
+          console.log("Nodes to create:", nodesToCreate);
+          if (nodesToCreate.length > 0) {
+            const nodesResult = await coursesApi.createNodes(course.id, nodesToCreate);
+            console.log("Nodes created:", nodesResult);
+          }
+        }
 
         setGeneratedCourseId(course.id)
         setStep("success")
