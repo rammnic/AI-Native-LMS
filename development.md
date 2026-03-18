@@ -348,6 +348,7 @@ DEBUG=next* npm run dev
 
 - [x] Select component: исправлено управление видимостью dropdown (открыт/закрыт)
 - [x] Frontend: настроен dev-режим с hot-reload в Docker
+- [x] Аутентификация: добавлена страница /login, AuthProvider, middleware
 - [ ] Стриминг: нужно доработать UI для плавного отображения
 - [ ] Консоль: режим Chat vs Debug нужно разделить UI
 - [ ] Валидация кода: только LLM (юзер запускает локально)

@@ -11,10 +11,10 @@ export default function Home() {
             <span className="text-xl font-bold">AI-Native LMS</span>
           </div>
           <nav className="flex items-center gap-6">
-            <Link href="/dashboard" className="text-slate-300 hover:text-white transition-colors">
+            <Link href="/login" className="text-slate-300 hover:text-white transition-colors">
               Dashboard
             </Link>
-            <Link href="/dashboard" className="px-4 py-2 bg-violet-600 hover:bg-violet-700 rounded-lg font-medium">
+            <Link href="/login" className="px-4 py-2 bg-violet-600 hover:bg-violet-700 rounded-lg font-medium">
               Get Started
             </Link>
           </nav>
@@ -37,10 +37,10 @@ export default function Home() {
             Personalized courses generated on-the-fly. AI mentor available 24/7.
           </p>
           <div className="flex gap-4 justify-center">
-            <Link href="/dashboard" className="px-8 py-4 bg-violet-600 hover:bg-violet-700 rounded-xl font-semibold">
+            <Link href="/login" className="px-8 py-4 bg-violet-600 hover:bg-violet-700 rounded-xl font-semibold">
               Start Learning
             </Link>
-            <Link href="/dashboard" className="px-8 py-4 bg-slate-800 hover:bg-slate-700 rounded-xl font-semibold border border-slate-700">
+            <Link href="/login" className="px-8 py-4 bg-slate-800 hover:bg-slate-700 rounded-xl font-semibold border border-slate-700">
               View Demo
             </Link>
           </div>

@@ -2,21 +2,30 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, BookOpen, Clock, Sparkles, Settings } from "lucide-react";
-import { coursesApi, User } from "@/lib/api";
+import { useRouter } from "next/navigation";
+import { Plus, BookOpen, Clock, Sparkles, LogOut } from "lucide-react";
+import { coursesApi } from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
 import { CreateCourseModal } from "@/components/create-course-modal";
 
 export default function DashboardPage() {
-  const [user, setUser] = useState<User | null>(null);
+  const { user, logout, isAuthenticated } = useAuth();
+  const router = useRouter();
   const [courses, setCourses] = useState<Array<{ id: string; title: string; description: string; status: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [createModalOpen, setCreateModalOpen] = useState(false);
 
   useEffect(() => {
+    if (!isAuthenticated && !loading) {
+      router.push("/login");
+      return;
+    }
+  }, [isAuthenticated, loading, router]);
+
+  useEffect(() => {
     async function fetchData() {
       try {
         const coursesData = await coursesApi.getAll();
-        setUser({ id: "demo", email: "demo@example.com", name: "Demo User", created_at: "" });
         setCourses(coursesData);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -24,8 +33,15 @@ export default function DashboardPage() {
         setLoading(false);
       }
     }
-    fetchData();
-  }, []);
+    if (isAuthenticated) {
+      fetchData();
+    }
+  }, [isAuthenticated]);
+
+  const handleLogout = () => {
+    logout();
+    router.push("/");
+  };
 
   const handleCourseCreated = (courseId: string) => {
     // Refresh courses list
@@ -51,10 +67,17 @@ export default function DashboardPage() {
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 rounded-lg">
               <div className="w-8 h-8 rounded-full bg-violet-600 flex items-center justify-center font-medium">
-                {user?.name?.[0] || "D"}
+                {user?.name?.[0] || "U"}
               </div>
-              <span className="text-sm">{user?.name || "Demo User"}</span>
+              <span className="text-sm">{user?.name || "User"}</span>
             </div>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-3 py-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+              title="Выйти"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </header>

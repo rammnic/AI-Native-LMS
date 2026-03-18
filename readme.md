@@ -43,35 +43,43 @@ AI-Native LMS — этоLearning Management System, где:
 
 ## Быстрый старт
 
-### Требования
-
-- Python 3.10+
-- Node.js 18+
-- PostgreSQL 14+
-
-### Установка
+### Docker Compose (рекомендуется)
 
 ```bash
 # 1. Клонировать репозиторий
 git clone https://github.com/rammnic/ai-native-lms.git
 cd ai-native-lms
 
-# 2. Настроить AI Backend Framework
-cd ../ai_backend_framework
-cp .env.example .env
-# Добавить OPENROUTER_API_KEY
-cd ai-backend-framework
-uvicorn api.main:app --reload --port 8000
+# 2. Создать .env файл
+copy .env.example .env
 
-# 3. Настроить LMS Backend
-cd ../../ai-native-lms/backend
+# 3. Запустить все сервисы
+docker-compose up -d
+
+# 4. Открыть в браузере
+# Frontend: http://localhost:3000
+# Backend API: http://localhost:8001
+# API Docs: http://localhost:8001/docs
+```
+
+### Локальная разработка
+
+```bash
+# 1. Клонировать репозиторий
+git clone https://github.com/rammnic/ai-native-lms.git
+cd ai-native-lms
+
+# 2. PostgreSQL
+docker run -d --name ai-lms-postgres -e POSTGRES_USER=lms_user -e POSTGRES_PASSWORD=lms_password -e POSTGRES_DB=ai_lms -p 5432:5432 postgres:16-alpine
+
+# 3. Backend
+cd backend
 python -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
-cp .env.example .env
 uvicorn main:app --reload --port 8001
 
-# 4. Запустить Frontend
+# 4. Frontend
 cd ../frontend
 npm install
 npm run dev
@@ -112,6 +120,7 @@ AI_API_URL=http://localhost:8000
 | Путь | Описание |
 |------|----------|
 | `/` | Landing page |
+| `/login` | Вход / Регистрация |
 | `/dashboard` | Playground пользователя |
 | `/course/[id]` | Карта курса (дерево) |
 | `/lesson/[id]/theory` | Лекция |
@@ -120,14 +129,16 @@ AI_API_URL=http://localhost:8000
 ## Roadmap
 
 - [x] Архитектура системы
-- [ ] Схема БД
-- [ ] Backend API
-- [ ] AI интеграция
-- [ ] Frontend Layout
-- [ ] Dashboard
-- [ ] Course Map
-- [ ] Lesson Pages
-- [ ] Smart Console
+- [x] Схема БД
+- [x] Backend API
+- [x] AI интеграция
+- [x] Frontend Layout
+- [x] Dashboard
+- [x] Course Map
+- [x] Lesson Pages
+- [x] Smart Console
+- [x] Аутентификация (JWT + UI)
+- [x] DevOps документация
 
 ## Лицензия
 
