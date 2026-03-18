@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: ai-lms-postgres
+    environment:
+      POSTGRES_USER: lms_user
+      POSTGRES_PASSWORD: lms_password
+      POSTGRES_DB: ai_lms
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lms_user -d ai_lms"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # LMS Backend (FastAPI)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ai-lms-backend
+    environment:
+      DATABASE_URL: postgresql+asyncpg://lms_user:lms_password@postgres:5432/ai_lms
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-key-change-in-production}
+      AI_API_URL: http://ai-framework:8000
+      AI_MOCK_ENABLED: ${AI_MOCK_ENABLED:-true}
+    ports:
+      - "8001:8001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # AI Backend Framework
+  ai-framework:
+    build:
+      context: C:/DevOps/VS_Code_Projects/ai_backend_framework/ai-backend-framework
+      dockerfile: Dockerfile
+    container_name: ai-lms-ai-framework
+    environment:
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  # Frontend (Next.js)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: development
+    container_name: ai-lms-frontend
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8001
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    command: npm run dev
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  default:
+    name: ai-lms-network
