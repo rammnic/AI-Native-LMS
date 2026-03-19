@@ -12,7 +12,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 import bcrypt
-from pydantic import BaseModel, EmailStr
+import re
+from pydantic import BaseModel, field_validator
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -31,14 +32,34 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 # Pydantic models
 class UserCreate(BaseModel):
-    email: EmailStr
+    email: str
     password: str
     name: Optional[str] = None
 
+    @field_validator('email')
+    @classmethod
+    def validate_email(cls, v: str) -> str:
+        # Flexible email validation - accepts most email formats
+        if not v or len(v) < 3:
+            raise ValueError('Email must be at least 3 characters')
+        # Basic check for @ symbol
+        if '@' not in v:
+            raise ValueError('Email must contain @')
+        return v
+
 
 class UserLogin(BaseModel):
-    email: EmailStr
+    email: str
     password: str
+
+    @field_validator('email')
+    @classmethod
+    def validate_email(cls, v: str) -> str:
+        if not v or len(v) < 3:
+            raise ValueError('Email must be at least 3 characters')
+        if '@' not in v:
+            raise ValueError('Email must contain @')
+        return v
 
 
 class UserResponse(BaseModel):

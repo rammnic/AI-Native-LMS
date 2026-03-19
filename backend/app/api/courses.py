@@ -81,6 +81,10 @@ def node_to_response(node) -> CourseNodeResponse:
     )
 
 
+# Node routes are now in a separate router to avoid conflicts
+# See nodes_router below
+
+
 @router.get("", response_model=List[CourseResponse])
 async def get_courses(
     current_user: UserResponse = Depends(get_current_user),
@@ -333,3 +337,91 @@ async def create_nodes_batch(
         nodes=[node_to_response(n) for n in created_nodes],
         created_count=len(created_nodes),
     )
+
+
+# Separate router for node operations to avoid route conflicts
+# This router is mounted at /api/v1/courses/nodes
+nodes_router = APIRouter()
+
+
+class NodeUpdate(BaseModel):
+    """Update node request."""
+    title: Optional[str] = None
+    content: Optional[str] = None
+    data: Optional[dict] = None
+    content_status: Optional[str] = None
+
+
+@nodes_router.get("/{node_id}", response_model=CourseNodeResponse)
+async def get_node(
+    node_id: str,
+    current_user: UserResponse = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Get a specific node by ID."""
+    from app.db.schema import Node, Course
+
+    result = await db.execute(
+        select(Node)
+        .where(Node.id == uuid.UUID(node_id))
+    )
+    node = result.scalar_one_or_none()
+
+    if not node:
+        raise HTTPException(status_code=404, detail="Node not found")
+
+    # Verify user owns the course this node belongs to
+    course_result = await db.execute(
+        select(Course).where(Course.id == node.course_id)
+    )
+    course = course_result.scalar_one_or_none()
+
+    if not course or str(course.author_id) != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    return node_to_response(node)
+
+
+@nodes_router.patch("/{node_id}", response_model=CourseNodeResponse)
+async def update_node(
+    node_id: str,
+    node_data: NodeUpdate,
+    current_user: UserResponse = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """Update a specific node."""
+    from app.db.schema import Node, Course
+
+    result = await db.execute(
+        select(Node)
+        .where(Node.id == uuid.UUID(node_id))
+    )
+    node = result.scalar_one_or_none()
+
+    if not node:
+        raise HTTPException(status_code=404, detail="Node not found")
+
+    # Verify user owns the course this node belongs to
+    course_result = await db.execute(
+        select(Course).where(Course.id == node.course_id)
+    )
+    course = course_result.scalar_one_or_none()
+
+    if not course or str(course.author_id) != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    # Update fields if provided
+    if node_data.title is not None:
+        node.title = node_data.title
+    if node_data.content is not None:
+        node.content = node_data.content
+    if node_data.data is not None:
+        node.data = node_data.data
+    if node_data.content_status is not None:
+        node.content_status = node_data.content_status
+
+    await db.commit()
+    await db.refresh(node)
+
+    logger.info(f"Node {node_id} updated successfully")
+    return node_to_response(node)

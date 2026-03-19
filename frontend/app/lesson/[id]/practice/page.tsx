@@ -4,10 +4,10 @@ import { useEffect, useState, useRef } from "react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import Editor, { OnMount } from "@monaco-editor/react"
-import { ArrowLeft, Code, Play, ChevronRight, CheckCircle, XCircle, Loader2 } from "lucide-react"
+import { ArrowLeft, Code, Play, ChevronRight, CheckCircle, XCircle, Loader2, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { SmartConsole } from "@/components/smart-console"
-import { aiApi } from "@/lib/api"
+import { aiApi, nodesApi } from "@/lib/api"
 
 interface PracticeData {
   id: string
@@ -17,6 +17,7 @@ interface PracticeData {
   tests: Array<{ input: string; expected_output: string }>
   course_id: string
   parent_context?: string
+  content_status: string
 }
 
 export default function PracticePage() {
@@ -28,36 +29,96 @@ export default function PracticePage() {
   const [running, setRunning] = useState(false)
   const [result, setResult] = useState<{ success: boolean; message: string; output?: string } | null>(null)
   const [showTask, setShowTask] = useState(true)
+  const [generating, setGenerating] = useState(false)
   const editorRef = useRef<any>(null)
 
   useEffect(() => {
     async function fetchPractice() {
       try {
-        // Mock data for demo - in real app would fetch from API
-        const mockPractice: PracticeData = {
-          id: lessonId,
-          title: "Hello World",
-          course_id: "demo-course-1",
-          parent_context: "User is learning Python basics - just read about print()",
-          task: `## Task: Hello World
-
-Write a Python program that prints "Hello, World!" to the console.
-
-### Requirements:
-- Use the \`print()\` function
-- Output must be exactly: \`Hello, World!\`
-
-### Example:
-\`\`\`python
-print("Hello, World!")
-\`\`\``,
-          solution: 'print("Hello, World!")',
-          tests: [{ input: "", expected_output: "Hello, World!" }],
+        // Fetch node from API
+        const node = await nodesApi.getById(lessonId)
+        
+        // If content is pending, generate it
+        if (node.content_status === "pending" || !node.data?.task) {
+          setGenerating(true)
+          try {
+            const result = await aiApi.generateContent(
+              { node_id: lessonId, course_id: node.course_id || "", title: node.title, parent_context: node.data?.parent_context || "" },
+              "practice"
+            )
+            if (result.success) {
+              const data = result.data as { task: string; solution: string; tests: Array<{ input: string; expected_output: string }> }
+              setPractice({
+                id: node.id,
+                title: node.title,
+                task: data.task || "# No task available",
+                solution: data.solution || "",
+                tests: data.tests || [],
+                course_id: node.course_id || "",
+                parent_context: node.data?.parent_context as string || "",
+                content_status: "generated",
+              })
+              setCode(data.solution || "")
+            } else {
+              setPractice({
+                id: node.id,
+                title: node.title,
+                task: node.data?.task as string || "# No task available",
+                solution: node.data?.solution as string || "",
+                tests: (node.data?.tests as Array<{ input: string; expected_output: string }>) || [],
+                course_id: node.course_id || "",
+                parent_context: node.data?.parent_context as string || "",
+                content_status: node.content_status,
+              })
+              setCode((node.data?.solution as string) || "")
+            }
+          } catch (genError) {
+            console.error("Error generating practice:", genError)
+            // Still show the node, even if generation failed
+            setPractice({
+              id: node.id,
+              title: node.title,
+              task: node.data?.task as string || "# Task generation failed\n\nPlease try again later or regenerate.",
+              solution: node.data?.solution as string || "",
+              tests: (node.data?.tests as Array<{ input: string; expected_output: string }>) || [],
+              course_id: node.course_id || "",
+              parent_context: node.data?.parent_context as string || "",
+              content_status: "pending",
+            })
+            setCode((node.data?.solution as string) || "")
+          }
+          setGenerating(false)
+        } else {
+          // Parse content from node.data
+          const taskData = node.data?.task as string || ""
+          const solutionData = node.data?.solution as string || ""
+          const testsData = (node.data?.tests as Array<{ input: string; expected_output: string }>) || []
+          
+          setPractice({
+            id: node.id,
+            title: node.title,
+            task: taskData,
+            solution: solutionData,
+            tests: testsData,
+            course_id: node.course_id || "",
+            parent_context: node.data?.parent_context as string || "",
+            content_status: node.content_status,
+          })
+          setCode(solutionData || "")
         }
-        setPractice(mockPractice)
-        setCode(mockPractice.solution)
       } catch (error) {
         console.error("Error fetching practice:", error)
+        // Fallback
+        setPractice({
+          id: lessonId,
+          title: "Practice",
+          task: "# Unable to load task\n\nPlease try again later.",
+          solution: "",
+          tests: [],
+          course_id: "",
+          parent_context: "",
+          content_status: "pending",
+        })
       } finally {
         setLoading(false)
       }
@@ -101,10 +162,13 @@ print("Hello, World!")
     }
   }
 
-  if (loading) {
+  if (loading || generating) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-500"></div>
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-500"></div>
+          <p className="text-slate-400">{generating ? "Generating practice content..." : "Loading..."}</p>
+        </div>
       </div>
     )
   }

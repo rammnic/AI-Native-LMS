@@ -4,10 +4,10 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import ReactMarkdown from "react-markdown"
-import { ArrowLeft, BookOpen, RefreshCw, Sparkles, ChevronRight } from "lucide-react"
+import { ArrowLeft, BookOpen, RefreshCw, Sparkles, ChevronRight, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { SmartConsole } from "@/components/smart-console"
-import { aiApi } from "@/lib/api"
+import { aiApi, nodesApi, CourseNode } from "@/lib/api"
 
 interface LessonData {
   id: string
@@ -15,6 +15,7 @@ interface LessonData {
   content: string
   course_id: string
   parent_context?: string
+  content_status: string
 }
 
 export default function TheoryPage() {
@@ -23,51 +24,76 @@ export default function TheoryPage() {
   const [lesson, setLesson] = useState<LessonData | null>(null)
   const [loading, setLoading] = useState(true)
   const [regenerating, setRegenerating] = useState(false)
+  const [generating, setGenerating] = useState(false)
 
   useEffect(() => {
     async function fetchLesson() {
       try {
-        // Mock data for demo - in real app would fetch from API
-        const mockLesson: LessonData = {
-          id: lessonId,
-          title: "What is Python?",
-          course_id: "demo-course-1",
-          parent_context: "User is learning Python basics",
-          content: `# What is Python?
-
-Python is a high-level, interpreted programming language known for its simplicity and readability.
-
-## Why Python?
-
-- **Easy to Learn**: Python has a clean syntax that reads like English
-- **Versatile**: Used in web development, data science, AI, automation, and more
-- **Large Community**: Extensive libraries and active community support
-- **Cross-Platform**: Works on Windows, Mac, Linux, and other platforms
-
-## Your First Python Program
-
-The classic "Hello, World!" program in Python is incredibly simple:
-
-\`\`\`python
-print("Hello, World!")
-\`\`\`
-
-This single line tells Python to display the text "Hello, World!" on the screen.
-
-## Key Features
-
-1. **Interpreted**: No compilation needed - Python runs line by line
-2. **Dynamic**: No need to declare variable types
-3. **Object-Oriented**: Supports OOP concepts
-4. **Extensive Libraries**: From web frameworks to scientific computing
-
-> "Python is the second best language for everything." - Unknown
-
-In the next lesson, you'll learn about variables and data types in Python.`,
+        // Fetch node from API
+        const node = await nodesApi.getById(lessonId)
+        
+        // If content is pending, generate it
+        if (node.content_status === "pending" || !node.content) {
+          setGenerating(true)
+          try {
+            const result = await aiApi.generateContent(
+              { node_id: lessonId, course_id: node.course_id || "", title: node.title, parent_context: node.data?.parent_context || "" },
+              "theory"
+            )
+            if (result.success) {
+              const data = result.data as { content: string }
+              setLesson({
+                id: node.id,
+                title: node.title,
+                content: data.content || "# Content pending generation...",
+                course_id: node.course_id || "",
+                parent_context: node.data?.parent_context as string || "",
+                content_status: "generated",
+              })
+            } else {
+              setLesson({
+                id: node.id,
+                title: node.title,
+                content: node.content || "# No content available",
+                course_id: node.course_id || "",
+                parent_context: node.data?.parent_context as string || "",
+                content_status: node.content_status,
+              })
+            }
+          } catch (genError) {
+            console.error("Error generating content:", genError)
+            // Still show the node, even if generation failed
+            setLesson({
+              id: node.id,
+              title: node.title,
+              content: node.content || "# Content generation failed\n\nPlease try again later or regenerate.",
+              course_id: node.course_id || "",
+              parent_context: node.data?.parent_context as string || "",
+              content_status: "pending",
+            })
+          }
+          setGenerating(false)
+        } else {
+          setLesson({
+            id: node.id,
+            title: node.title,
+            content: node.content,
+            course_id: node.course_id || "",
+            parent_context: node.data?.parent_context as string || "",
+            content_status: node.content_status,
+          })
         }
-        setLesson(mockLesson)
       } catch (error) {
         console.error("Error fetching lesson:", error)
+        // Fallback to mock data if API fails
+        setLesson({
+          id: lessonId,
+          title: "Lesson Content",
+          course_id: "",
+          parent_context: "",
+          content: "# Unable to load content\n\nPlease try again later.",
+          content_status: "pending",
+        })
       } finally {
         setLoading(false)
       }
@@ -93,10 +119,13 @@ In the next lesson, you'll learn about variables and data types in Python.`,
     }
   }
 
-  if (loading) {
+  if (loading || generating) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-500"></div>
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-500"></div>
+          <p className="text-slate-400">{generating ? "Generating theory content..." : "Loading..."}</p>
+        </div>
       </div>
     )
   }

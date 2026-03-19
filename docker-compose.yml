@@ -40,7 +40,7 @@ services:
   # AI Backend Framework
   ai-framework:
     build:
-      context: C:/DevOps/VS_Code_Projects/ai_backend_framework/ai-backend-framework
+      context: ./ai_backend_framework/ai-backend-framework
       dockerfile: Dockerfile
     container_name: ai-lms-ai-framework
     environment:
@@ -48,7 +48,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - C:/DevOps/VS_Code_Projects/ai_backend_framework/ai-backend-framework/pipelines:/app/pipelines
+      - ./ai_backend_framework/ai-backend-framework/pipelines:/app/pipelines
     restart: unless-stopped
 
   # Frontend (Next.js)

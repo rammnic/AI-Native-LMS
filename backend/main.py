@@ -53,6 +53,7 @@ app.add_middleware(
 # Include routers
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
 app.include_router(courses.router, prefix="/api/v1/courses", tags=["courses"])
+app.include_router(courses.nodes_router, prefix="/api/v1/courses/nodes", tags=["nodes"])
 app.include_router(progress.router, prefix="/api/v1/progress", tags=["progress"])
 app.include_router(ai_proxy.router, prefix="/api/v1/ai", tags=["ai"])
 

@@ -278,6 +278,34 @@ POST /api/v1/ai/generate/structure
 }
 ```
 
+### Ответ: Контент урока (POST /api/v1/ai/generate/content)
+
+**Theory** (pipeline `lesson_theory`) — фронтенд ожидает:
+
+```json
+{
+  "success": true,
+  "data": {
+    "content": "<markdown>"
+  }
+}
+```
+
+**Practice** (pipeline `lesson_practice`) — фронтенд ожидает:
+
+```json
+{
+  "success": true,
+  "data": {
+    "task": "<task text>",
+    "solution": "<reference solution>",
+    "tests": [
+      { "input": "...", "expected_output": "..." }
+    ]
+  }
+}
+```
+
 ## API Endpoints
 
 ### Auth
@@ -295,6 +323,12 @@ POST /api/v1/ai/generate/structure
 | GET | /api/v1/courses/:id | Детали курса |
 | DELETE | /api/v1/courses/:id | Удалить курс |
 | POST | /api/v1/courses/:id/nodes/batch | Создать несколько нод |
+
+### Nodes
+| Метод | Путь | Описание |
+|-------|------|----------|
+| GET | /api/v1/courses/nodes/:id | Получить ноду по ID |
+| PATCH | /api/v1/courses/nodes/:id | Обновить ноду (content, data, content_status) |
 
 ### Progress
 | Метод | Путь | Описание |
@@ -350,6 +384,10 @@ DEBUG=next* npm run dev
 - [x] Select component: исправлено управление видимостью dropdown (открыт/закрыт)
 - [x] Frontend: настроен dev-режим с hot-reload в Docker
 - [x] Аутентификация: добавлена страница /login, AuthProvider, middleware
+- [x] AI Pipeline: исправлена проблема с пустым курсом при создании (добавлены JsonParseNode, JsonTransformNode, ExtractCourseMetadataNode)
+- [x] Генерация контента: исправлено сохранение в БД (ai_proxy.py теперь сохраняет content/data после генерации)
+- [x] Контракт AI proxy ↔ pipelines: нормализованы keys для real AI (lesson_theory/lesson_practice/ai_mentor)
+- [x] Nodes API: добавлен PATCH endpoint для обновления ноды
 - [ ] Стриминг: нужно доработать UI для плавного отображения
 - [ ] Консоль: режим Chat vs Debug нужно разделить UI
 - [ ] Валидация кода: только LLM (юзер запускает локально)

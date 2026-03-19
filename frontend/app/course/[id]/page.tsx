@@ -120,16 +120,33 @@ export default function CoursePage() {
     const hasChildren = node.children && node.children.length > 0;
     const isExpanded = expandedNodes.has(node.id);
 
+    // Determine navigation target for lesson nodes
+    const getLessonLink = () => {
+      if (node.type === "theory") return `/lesson/${node.id}/theory`;
+      if (node.type === "practice") return `/lesson/${node.id}/practice`;
+      return null;
+    };
+    const lessonLink = getLessonLink();
+
     return (
       <div key={node.id} style={{ marginLeft: depth * 20 }}>
-        <div className={`flex items-center gap-2 p-3 rounded-lg hover:bg-slate-800/50 cursor-pointer ${node.type === "topic" ? "font-medium" : ""}`} onClick={() => hasChildren && toggleNode(node.id)}>
+        <Link 
+          href={lessonLink || "#"} 
+          onClick={(e) => {
+            if (hasChildren) {
+              e.preventDefault();
+              toggleNode(node.id);
+            }
+          }}
+          className={`flex items-center gap-2 p-3 rounded-lg hover:bg-slate-800/50 cursor-pointer ${node.type === "topic" ? "font-medium" : ""}`}
+        >
           {hasChildren && <ChevronRight className={`w-4 h-4 text-slate-500 transition-transform ${isExpanded ? "rotate-90" : ""}`} />}
           {!hasChildren && <div className="w-4" />}
           {getNodeIcon(node.type)}
           <span className="flex-1">{node.title}</span>
-          {node.type === "theory" && <Link href={`/lesson/${node.id}/theory`} className="text-xs px-2 py-1 rounded bg-cyan-500/20 text-cyan-300">Theory</Link>}
-          {node.type === "practice" && <Link href={`/lesson/${node.id}/practice`} className="text-xs px-2 py-1 rounded bg-emerald-500/20 text-emerald-300">Practice</Link>}
-        </div>
+          {node.type === "theory" && <span className="text-xs px-2 py-1 rounded bg-cyan-500/20 text-cyan-300">Theory</span>}
+          {node.type === "practice" && <span className="text-xs px-2 py-1 rounded bg-emerald-500/20 text-emerald-300">Practice</span>}
+        </Link>
         {hasChildren && isExpanded && <div>{node.children!.map((child) => renderNode(child, depth + 1))}</div>}
       </div>
     );

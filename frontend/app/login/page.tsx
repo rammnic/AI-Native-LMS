@@ -127,7 +127,7 @@ export default function LoginPage() {
         </div>
 
         <div className="mt-6 text-center">
-          <Link href="/dashboard" className="text-slate-500 hover:text-slate-400 text-sm transition-colors">
+          <Link href="/" className="text-slate-500 hover:text-slate-400 text-sm transition-colors">
             ← Вернуться на главную
           </Link>
         </div>

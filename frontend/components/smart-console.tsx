@@ -117,7 +117,11 @@ export function SmartConsole({
         
         if (result.success) {
           const data = result.data as { answer: string }
-          addMessage("ai", data.answer)
+          if (data.answer && data.answer.trim()) {
+            addMessage("ai", data.answer)
+          } else {
+            addMessage("system", "AI returned an empty response. Please try again.")
+          }
         }
       } catch (error) {
         addMessage("system", `Error: ${error instanceof Error ? error.message : "Unknown error"}`)
