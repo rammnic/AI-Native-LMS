@@ -1,6 +1,6 @@
 # AI-Native LMS — План разработки
 
-## Версия проекта: 0.4.1 (Content Generation Fixed)
+## Версия проекта: 0.5.0 (JSON Structured Output)
 
 ---
 
@@ -11,9 +11,9 @@
 | Архитектура | ✅ 100% | Зафиксирована |
 | Документация | ✅ 100% | Готово + DevOps |
 | Frontend UI | ✅ 95% | Основные страницы + Auth |
-| LMS Backend | ✅ 95% | API роуты + PostgreSQL + Auth |
-| AI Интеграция | ✅ 95% | Proxy + AI Framework готовы |
-| AI Pipelines | ⚠️ 30% | Нужно создать пайплайны |
+| LMS Backend | ✅ 98% | API роуты + PostgreSQL + Auth |
+| AI Интеграция | ✅ 100% | Proxy + AI Framework + Structured Output |
+| AI Pipelines | ✅ 100% | Все пайплайны готовы |
 | Схема БД | ✅ 100% | PostgreSQL + SQLAlchemy |
 | Аутентификация | ✅ 100% | JWT + Login UI + Middleware |
 
@@ -46,6 +46,7 @@
 - [x] **2.1** Course Outline Generator
   - [x] Вход: user_prompt, difficulty, depth_limit
   - [x] Выход: JSON структура курса
+  - [x] **Structured Output**: json_mode включён
 
 - [x] **2.2** Lesson Theory Generator
   - [x] Вход: node_id, parent_context, title
@@ -54,6 +55,7 @@
 - [x] **2.3** Lesson Practice Generator
   - [x] Вход: node_id, theory_content
   - [x] Выход: Задача + тесты + эталонное решение
+  - [x] **Structured Output**: json_mode включён
 
 - [x] **2.4** Code Validator
   - [x] Вход: user_code, expected_output, tests
@@ -154,6 +156,7 @@
 - [x] **8.1** Создать пайплайн course_outline
   - [x] JSON конфиг в ai_backend_framework/pipelines/
   - [x] LLMNode + PromptNode для генерации структуры курса
+  - [x] json_mode: true для Structured Output
 
 - [x] **8.2** Создать пайплайн lesson_theory
   - [x] Генерация Markdown контента лекции
@@ -162,6 +165,7 @@
 - [x] **8.3** Создать пайплайн lesson_practice
   - [x] Генерация задачи + тестов + решения
   - [x] Code validation логика
+  - [x] json_mode: true для Structured Output
 
 - [x] **8.4** Создать пайплайн code_validator
   - [x] Валидация кода через LLM
@@ -198,6 +202,34 @@
 
 ---
 
+### Phase 10: JSON Parsing Fix (Structured Output)
+
+- [x] **10.1** Добавлен json_mode в LLMNode
+  - [x] Параметр `json_mode: bool` в конструкторе
+  - [x] Добавление `response_format: {"type": "json_object"}` к API запросу
+  - [x] Автоматический парсинг JSON из ответа
+
+- [x] **10.2** Обновлены пайплайны
+  - [x] course_outline.json: `json_mode: true`
+  - [x] lesson_practice.json: `json_mode: true`
+  - [x] Промпты обновлены для возврата JSON объектов
+
+- [x] **10.3** Упрощён JsonParseNode
+  - [x] Убран дублирующий парсинг (300+ строк → ~100)
+  - [x] json_repair используется как primary fallback
+  - [x] Поддержка уже распарсенных dict/list (от json_mode)
+
+- [x] **10.4** Упрощён ai_proxy.py
+  - [x] Убрана функция `_extract_json()` — парсинг в AI Framework
+  - [x] Только нормализация ключей для frontend
+  - [x] Добавлен helper `_save_content_to_db()`
+
+- [x] **10.5** Тестирование
+  - [x] selftest_json_transform_node.py обновлён
+  - [x] Тесты проходят (новый и legacy форматы)
+
+---
+
 ## Нерешённые вопросы
 
 ### 🔴 Критические
@@ -216,10 +248,11 @@
 
 ## Следующий шаг
 
-> Запустить Docker Compose и проверить работу:
-> ```bash
-> docker-compose up -d
-> ```
+> Протестировать реальную генерацию курсов:
+> 1. Убедиться что AI_MOCK_ENABLED=false
+> 2. Открыть http://localhost:3000
+> 3. Создать новый курс
+> 4. Проверить что JSON парсится корректно
 
 ---
 
@@ -227,6 +260,7 @@
 
 | Версия | Дата | Описание |
 |--------|------|----------|
+| 0.5.0 | 2026-03-21 | JSON Structured Output: LLMNode json_mode, упрощён JsonParseNode |
 | 0.4.1 | 2026-03-20 | Bug Fix: Исправлено сохранение контента в БД после генерации |
 | 0.4.0 | 2026-03-19 | AI Integration: AI Framework подключён, нужны пайплайны |
 | 0.3.0 | 2026-03-19 | Production-Ready Dev: Auth UI + DevOps docs |
