@@ -18,21 +18,26 @@ export function CreateCourseModal({ open, onOpenChange, onCourseCreated }: Creat
   const [prompt, setPrompt] = useState("")
   const [difficulty, setDifficulty] = useState("intermediate")
   const [depthLimit, setDepthLimit] = useState("3")
+  const [language, setLanguage] = useState("ru") // Language setting: ru/en
   const [loading, setLoading] = useState(false)
   const [step, setStep] = useState<"input" | "generating" | "success">("input")
   const [generatedCourseId, setGeneratedCourseId] = useState<string | null>(null)
 
-  // Helper function to flatten AI structure to nodes with parent_id mapping
+  // Helper function to flatten AI structure to nodes with proper order_index preservation
   const flattenStructure = (
-    structure: Array<{ id: string; title: string; type: string; children?: Array<{ id: string; title: string; type: string; content: unknown }> }>,
+    structure: Array<{ id: string; title: string; type: string; order_index?: number; children?: Array<{ id: string; title: string; type: string; order_index?: number; content: unknown }> }>,
     parentId: string | null = null,
-    nodes: Array<{ id: string; title: string; type: "topic" | "theory" | "practice"; parent_id: string | null }> = [],
-    idMap: Map<string, string> = new Map()
-  ): Array<{ id: string; title: string; type: "topic" | "theory" | "practice"; parent_id: string | null }> => {
-    structure.forEach((item) => {
-      // Generate new UUID for each node
+    nodes: Array<{ id: string; title: string; type: "topic" | "theory" | "practice"; parent_id: string | null; order_index: number }> = [],
+    idMap: Map<string, string> = new Map(),
+    siblingIndex: number = 0
+  ): Array<{ id: string; title: string; type: "topic" | "theory" | "practice"; parent_id: string | null; order_index: number }> => {
+    structure.forEach((item, idx) => {
+      // Generate new UUID for each node but preserve AI's order_index if provided
       const newId = crypto.randomUUID();
       idMap.set(item.id, newId);
+      
+      // Preserve order from AI structure, fallback to sibling index
+      const orderIndex = item.order_index ?? idx;
       
       // Include the generated id so backend uses it
       nodes.push({
@@ -40,10 +45,11 @@ export function CreateCourseModal({ open, onOpenChange, onCourseCreated }: Creat
         title: item.title,
         type: item.type as "topic" | "theory" | "practice",
         parent_id: parentId,
+        order_index: orderIndex,
       });
 
       if (item.children && item.children.length > 0) {
-        flattenStructure(item.children, newId, nodes, idMap);
+        flattenStructure(item.children, newId, nodes, idMap, 0);
       }
     });
     return nodes;
@@ -75,11 +81,11 @@ export function CreateCourseModal({ open, onOpenChange, onCourseCreated }: Creat
         console.log("AI data:", data);
         console.log("Structure:", data?.structure);
         
-        // Create course in DB
+        // Create course in DB with language setting
         const course = await coursesApi.create(
           data.course_title || "Untitled Course",
           data.course_description || "",
-          { difficulty, depth_limit: parseInt(depthLimit) }
+          { difficulty, depth_limit: parseInt(depthLimit), language }
         )
         console.log("Course created:", course);
 
@@ -142,7 +148,7 @@ export function CreateCourseModal({ open, onOpenChange, onCourseCreated }: Creat
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className="text-sm font-medium text-slate-300 mb-2 block">
                     Difficulty
@@ -172,6 +178,21 @@ export function CreateCourseModal({ open, onOpenChange, onCourseCreated }: Creat
                       <SelectItem value="3">3 levels</SelectItem>
                       <SelectItem value="4">4 levels</SelectItem>
                       <SelectItem value="5">5 levels</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-slate-300 mb-2 block">
+                    Language
+                  </label>
+                  <Select value={language} onValueChange={setLanguage}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ru">Русский</SelectItem>
+                      <SelectItem value="en">English</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

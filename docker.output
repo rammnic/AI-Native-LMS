@@ -1,0 +1,494 @@
+postgres     | 2026-03-21 02:52:15.976 | The files belonging to this database system will be owned by user "postgres".
+postgres     | 2026-03-21 02:52:15.977 | This user must also own the server process.
+postgres     | 2026-03-21 02:52:15.977 | 
+postgres     | 2026-03-21 02:52:15.977 | The database cluster will be initialized with locale "en_US.utf8".
+postgres     | 2026-03-21 02:52:15.977 | The default database encoding has accordingly been set to "UTF8".
+postgres     | 2026-03-21 02:52:15.977 | The default text search configuration will be set to "english".
+postgres     | 2026-03-21 02:52:15.977 | 
+postgres     | 2026-03-21 02:52:15.977 | Data page checksums are disabled.
+postgres     | 2026-03-21 02:52:15.977 | 
+postgres     | 2026-03-21 02:52:15.977 | fixing permissions on existing directory /var/lib/postgresql/data ... ok
+postgres     | 2026-03-21 02:52:15.986 | creating subdirectories ... ok
+postgres     | 2026-03-21 02:52:15.986 | selecting dynamic shared memory implementation ... posix
+postgres     | 2026-03-21 02:52:16.007 | selecting default max_connections ... 100
+postgres     | 2026-03-21 02:52:16.035 | selecting default shared_buffers ... 128MB
+postgres     | 2026-03-21 02:52:16.149 | selecting default time zone ... UTC
+postgres     | 2026-03-21 02:52:16.150 | creating configuration files ... ok
+postgres     | 2026-03-21 02:52:16.306 | running bootstrap script ... ok
+postgres     | 2026-03-21 02:52:16.514 | sh: locale: not found
+postgres     | 2026-03-21 02:52:16.514 | 2026-03-20 16:52:16.514 UTC [35] WARNING:  no usable system locales were found
+ai-framework | 2026-03-21 02:52:16.729 | INFO:     Started server process [1]
+ai-framework | 2026-03-21 02:52:16.729 | INFO:     Waiting for application startup.
+ai-framework | 2026-03-21 02:52:16.730 | INFO:     Application startup complete.
+ai-framework | 2026-03-21 02:52:16.733 | INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+postgres     | 2026-03-21 02:52:16.954 | performing post-bootstrap initialization ... ok
+postgres     | 2026-03-21 02:52:17.625 | syncing data to disk ... ok
+postgres     | 2026-03-21 02:52:17.625 | 
+postgres     | 2026-03-21 02:52:17.625 | 
+postgres     | 2026-03-21 02:52:17.625 | Success. You can now start the database server using:
+postgres     | 2026-03-21 02:52:17.625 | 
+postgres     | 2026-03-21 02:52:17.625 |     pg_ctl -D /var/lib/postgresql/data -l logfile start
+postgres     | 2026-03-21 02:52:17.625 | 
+postgres     | 2026-03-21 02:52:17.625 | initdb: warning: enabling "trust" authentication for local connections
+postgres     | 2026-03-21 02:52:17.626 | initdb: hint: You can change this by editing pg_hba.conf or using the option -A, or --auth-local and --auth-host, the next time you run initdb.
+postgres     | 2026-03-21 02:52:17.674 | waiting for server to start....2026-03-20 16:52:17.674 UTC [41] LOG:  starting PostgreSQL 16.13 on x86_64-pc-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit
+postgres     | 2026-03-21 02:52:17.678 | 2026-03-20 16:52:17.677 UTC [41] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+postgres     | 2026-03-21 02:52:17.689 | 2026-03-20 16:52:17.689 UTC [44] LOG:  database system was shut down at 2026-03-20 16:52:16 UTC
+postgres     | 2026-03-21 02:52:17.697 | 2026-03-20 16:52:17.697 UTC [41] LOG:  database system is ready to accept connections
+postgres     | 2026-03-21 02:52:17.748 |  done
+postgres     | 2026-03-21 02:52:17.748 | server started
+postgres     | 2026-03-21 02:52:17.841 | CREATE DATABASE
+postgres     | 2026-03-21 02:52:17.842 | 
+postgres     | 2026-03-21 02:52:17.842 | 
+postgres     | 2026-03-21 02:52:17.842 | /usr/local/bin/docker-entrypoint.sh: ignoring /docker-entrypoint-initdb.d/*
+postgres     | 2026-03-21 02:52:17.842 | 
+postgres     | 2026-03-21 02:52:17.843 | waiting for server to shut down....2026-03-20 16:52:17.843 UTC [41] LOG:  received fast shutdown request
+postgres     | 2026-03-21 02:52:17.847 | 2026-03-20 16:52:17.847 UTC [41] LOG:  aborting any active transactions
+postgres     | 2026-03-21 02:52:17.850 | 2026-03-20 16:52:17.849 UTC [41] LOG:  background worker "logical replication launcher" (PID 47) exited with exit code 1
+postgres     | 2026-03-21 02:52:17.850 | 2026-03-20 16:52:17.850 UTC [42] LOG:  shutting down
+postgres     | 2026-03-21 02:52:17.853 | 2026-03-20 16:52:17.853 UTC [42] LOG:  checkpoint starting: shutdown immediate
+postgres     | 2026-03-21 02:52:18.102 | 2026-03-20 16:52:18.102 UTC [42] LOG:  checkpoint complete: wrote 926 buffers (5.7%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.033 s, sync=0.204 s, total=0.253 s; sync files=301, longest=0.004 s, average=0.001 s; distance=4272 kB, estimate=4272 kB; lsn=0/191E930, redo lsn=0/191E930
+postgres     | 2026-03-21 02:52:18.116 | 2026-03-20 16:52:18.115 UTC [41] LOG:  database system is shut down
+postgres     | 2026-03-21 02:52:18.144 |  done
+postgres     | 2026-03-21 02:52:18.144 | server stopped
+postgres     | 2026-03-21 02:52:18.146 | 
+postgres     | 2026-03-21 02:52:18.146 | PostgreSQL init process complete; ready for start up.
+postgres     | 2026-03-21 02:52:18.146 | 
+postgres     | 2026-03-21 02:52:18.180 | 2026-03-20 16:52:18.180 UTC [1] LOG:  starting PostgreSQL 16.13 on x86_64-pc-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit
+postgres     | 2026-03-21 02:52:18.180 | 2026-03-20 16:52:18.180 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+postgres     | 2026-03-21 02:52:18.180 | 2026-03-20 16:52:18.180 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+postgres     | 2026-03-21 02:52:18.188 | 2026-03-20 16:52:18.188 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+postgres     | 2026-03-21 02:52:18.198 | 2026-03-20 16:52:18.197 UTC [57] LOG:  database system was shut down at 2026-03-20 16:52:18 UTC
+postgres     | 2026-03-21 02:52:18.207 | 2026-03-20 16:52:18.207 UTC [1] LOG:  database system is ready to accept connections
+frontend     | 2026-03-21 02:52:22.426 | 
+frontend     | 2026-03-21 02:52:22.426 | > frontend@0.1.0 dev
+frontend     | 2026-03-21 02:52:22.426 | > next dev
+frontend     | 2026-03-21 02:52:22.426 | 
+backend      | 2026-03-21 02:52:22.525 | 2026-03-20 16:52:22 - main - INFO - All routes registered successfully
+backend      | 2026-03-21 02:52:22.526 | INFO:     Started server process [1]
+backend      | 2026-03-21 02:52:22.526 | INFO:     Waiting for application startup.
+backend      | 2026-03-21 02:52:22.526 | 2026-03-20 16:52:22 - main - INFO - Starting AI-Native LMS API...
+backend      | 2026-03-21 02:52:22.624 | 2026-03-20 16:52:22 - main - INFO - Database initialized successfully!
+backend      | 2026-03-21 02:52:22.624 | 2026-03-20 16:52:22 - main - INFO - Application started successfully!
+backend      | 2026-03-21 02:52:22.624 | INFO:     Application startup complete.
+backend      | 2026-03-21 02:52:22.625 | INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+frontend     | 2026-03-21 02:52:23.277 | ▲ Next.js 16.1.6 (Turbopack)
+frontend     | 2026-03-21 02:52:23.277 | - Local:         http://localhost:3000
+frontend     | 2026-03-21 02:52:23.277 | - Network:       http://172.19.0.5:3000
+frontend     | 2026-03-21 02:52:23.277 | 
+frontend     | 2026-03-21 02:52:23.277 | ✓ Starting...
+frontend     | 2026-03-21 02:52:24.120 | ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+frontend     | 2026-03-21 02:52:24.312 | ✓ Ready in 1411ms
+ai-framework | 2026-03-21 02:52:50.914 | INFO:     Shutting down
+ai-framework | 2026-03-21 02:52:51.014 | INFO:     Waiting for application shutdown.
+ai-framework | 2026-03-21 02:52:51.015 | INFO:     Application shutdown complete.
+ai-framework | 2026-03-21 02:52:51.015 | INFO:     Finished server process [1]
+frontend     | 2026-03-21 02:52:51.567 | 
+frontend     | 2026-03-21 02:52:51.600 | npm notice
+frontend     | 2026-03-21 02:52:51.600 | npm notice New major version of npm available! 10.8.2 -> 11.12.0
+frontend     | 2026-03-21 02:52:51.600 | npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.0
+frontend     | 2026-03-21 02:52:51.600 | npm notice To update run: npm install -g npm@11.12.0
+frontend     | 2026-03-21 02:52:51.600 | npm notice
+backend      | 2026-03-21 02:52:51.994 | INFO:     Shutting down
+backend      | 2026-03-21 02:52:52.095 | INFO:     Waiting for application shutdown.
+backend      | 2026-03-21 02:52:52.095 | 2026-03-20 16:52:52 - main - INFO - Application shutting down...
+backend      | 2026-03-21 02:52:52.095 | INFO:     Application shutdown complete.
+backend      | 2026-03-21 02:52:52.096 | INFO:     Finished server process [1]
+backend      | 2026-03-21 02:52:52.097 | Database tables created successfully!
+postgres     | 2026-03-21 02:52:52.548 | 2026-03-20 16:52:52.548 UTC [1] LOG:  received fast shutdown request
+postgres     | 2026-03-21 02:52:52.551 | 2026-03-20 16:52:52.551 UTC [1] LOG:  aborting any active transactions
+postgres     | 2026-03-21 02:52:52.554 | 2026-03-20 16:52:52.554 UTC [1] LOG:  background worker "logical replication launcher" (PID 60) exited with exit code 1
+postgres     | 2026-03-21 02:52:52.554 | 2026-03-20 16:52:52.554 UTC [55] LOG:  shutting down
+postgres     | 2026-03-21 02:52:52.557 | 2026-03-20 16:52:52.557 UTC [55] LOG:  checkpoint starting: shutdown immediate
+postgres     | 2026-03-21 02:52:52.641 | 2026-03-20 16:52:52.641 UTC [55] LOG:  checkpoint complete: wrote 67 buffers (0.4%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.009 s, sync=0.061 s, total=0.087 s; sync files=55, longest=0.004 s, average=0.002 s; distance=284 kB, estimate=284 kB; lsn=0/1965A50, redo lsn=0/1965A50
+postgres     | 2026-03-21 02:52:52.650 | 2026-03-20 16:52:52.650 UTC [1] LOG:  database system is shut down
+postgres     | 2026-03-21 02:53:03.817 | 
+postgres     | 2026-03-21 02:53:03.817 | PostgreSQL Database directory appears to contain a database; Skipping initialization
+postgres     | 2026-03-21 02:53:03.817 | 
+postgres     | 2026-03-21 02:53:03.853 | 2026-03-20 16:53:03.853 UTC [1] LOG:  starting PostgreSQL 16.13 on x86_64-pc-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit
+postgres     | 2026-03-21 02:53:03.854 | 2026-03-20 16:53:03.853 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+postgres     | 2026-03-21 02:53:03.854 | 2026-03-20 16:53:03.853 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+postgres     | 2026-03-21 02:53:03.860 | 2026-03-20 16:53:03.860 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+postgres     | 2026-03-21 02:53:03.869 | 2026-03-20 16:53:03.869 UTC [29] LOG:  database system was shut down at 2026-03-20 16:52:52 UTC
+postgres     | 2026-03-21 02:53:03.877 | 2026-03-20 16:53:03.877 UTC [1] LOG:  database system is ready to accept connections
+ai-framework | 2026-03-21 02:53:04.310 | INFO:     Started server process [1]
+ai-framework | 2026-03-21 02:53:04.310 | INFO:     Waiting for application startup.
+ai-framework | 2026-03-21 02:53:04.310 | INFO:     Application startup complete.
+ai-framework | 2026-03-21 02:53:04.312 | INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+frontend     | 2026-03-21 02:53:10.000 | 
+frontend     | 2026-03-21 02:53:10.000 | > frontend@0.1.0 dev
+frontend     | 2026-03-21 02:53:10.000 | > next dev
+frontend     | 2026-03-21 02:53:10.000 | 
+backend      | 2026-03-21 02:53:10.141 | 2026-03-20 16:53:10 - main - INFO - All routes registered successfully
+backend      | 2026-03-21 02:53:10.141 | INFO:     Started server process [1]
+backend      | 2026-03-21 02:53:10.141 | INFO:     Waiting for application startup.
+backend      | 2026-03-21 02:53:10.142 | 2026-03-20 16:53:10 - main - INFO - Starting AI-Native LMS API...
+backend      | 2026-03-21 02:53:10.186 | 2026-03-20 16:53:10 - main - INFO - Database initialized successfully!
+backend      | 2026-03-21 02:53:10.186 | 2026-03-20 16:53:10 - main - INFO - Application started successfully!
+backend      | 2026-03-21 02:53:10.186 | INFO:     Application startup complete.
+backend      | 2026-03-21 02:53:10.186 | INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+frontend     | 2026-03-21 02:53:10.940 | ▲ Next.js 16.1.6 (Turbopack)
+frontend     | 2026-03-21 02:53:10.940 | - Local:         http://localhost:3000
+frontend     | 2026-03-21 02:53:10.940 | - Network:       http://172.19.0.5:3000
+frontend     | 2026-03-21 02:53:10.940 | 
+frontend     | 2026-03-21 02:53:10.940 | ✓ Starting...
+frontend     | 2026-03-21 02:53:11.684 | ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+frontend     | 2026-03-21 02:53:11.883 | ✓ Ready in 1349ms
+frontend     | 2026-03-21 02:53:32.441 |  GET / 200 in 2.1s (compile: 1665ms, proxy.ts: 100ms, render: 314ms)
+backend      | 2026-03-21 02:53:33.096 | Database tables created successfully!
+backend      | 2026-03-21 02:53:33.096 | INFO:     172.19.0.1:54242 - "OPTIONS /api/v1/auth/me HTTP/1.1" 200 OK
+backend      | 2026-03-21 02:53:33.150 | INFO:     172.19.0.1:54242 - "GET /api/v1/auth/me HTTP/1.1" 401 Unauthorized
+frontend     | 2026-03-21 02:53:42.085 |  GET /login 200 in 230ms (compile: 185ms, proxy.ts: 9ms, render: 36ms)
+backend      | 2026-03-21 02:53:53.567 | INFO:     172.19.0.1:60332 - "OPTIONS /api/v1/auth/login HTTP/1.1" 200 OK
+backend      | 2026-03-21 02:53:53.582 | INFO:     172.19.0.1:60332 - "POST /api/v1/auth/login HTTP/1.1" 401 Unauthorized
+backend      | 2026-03-21 02:53:58.771 | INFO:     172.19.0.1:60340 - "OPTIONS /api/v1/auth/register HTTP/1.1" 200 OK
+backend      | 2026-03-21 02:53:58.969 | INFO:     172.19.0.1:60340 - "POST /api/v1/auth/register HTTP/1.1" 200 OK
+frontend     | 2026-03-21 02:53:59.144 |  GET /dashboard 200 in 163ms (compile: 129ms, proxy.ts: 6ms, render: 28ms)
+backend      | 2026-03-21 02:53:59.195 | INFO:     172.19.0.1:60340 - "OPTIONS /api/v1/courses HTTP/1.1" 200 OK
+backend      | 2026-03-21 02:53:59.197 | INFO:     172.19.0.1:60342 - "OPTIONS /api/v1/courses HTTP/1.1" 200 OK
+backend      | 2026-03-21 02:53:59.210 | INFO:     172.19.0.1:60340 - "GET /api/v1/courses HTTP/1.1" 200 OK
+backend      | 2026-03-21 02:53:59.220 | INFO:     172.19.0.1:60342 - "GET /api/v1/courses HTTP/1.1" 200 OK
+backend      | 2026-03-21 02:53:59.234 | INFO:     172.19.0.1:60342 - "GET /api/v1/courses HTTP/1.1" 200 OK
+backend      | 2026-03-21 02:55:30.665 | INFO:     172.19.0.1:40934 - "OPTIONS /api/v1/ai/generate/structure HTTP/1.1" 200 OK
+backend      | 2026-03-21 02:55:30.677 | 2026-03-20 16:55:30 - app.api.ai_proxy - INFO - generate_course_structure called with: {'user_prompt': 'Хочу вкатиться в devops у меня есть бэкграунд админом сопровождения.\nКурс должен быть всеобъемлющим, обяъснять все основные аспекты, инструменты, концепции.', 'difficulty': 'intermediate', 'depth_limit': 3, 'user_id': 'demo-user-1'}
+backend      | 2026-03-21 02:55:30.749 | 2026-03-20 16:55:30 - app.api.ai_proxy - INFO - Calling AI Framework at http://ai-framework:8000/execute
+ai-framework | 2026-03-21 02:55:44.177 | INFO:     172.19.0.4:34838 - "POST /execute HTTP/1.1" 200 OK
+backend      | 2026-03-21 02:55:44.178 | 2026-03-20 16:55:44 - httpx - INFO - HTTP Request: POST http://ai-framework:8000/execute "HTTP/1.1 200 OK"
+backend      | 2026-03-21 02:55:44.178 | 2026-03-20 16:55:44 - app.api.ai_proxy - INFO - AI Framework response status: 200
+backend      | 2026-03-21 02:55:44.179 | 2026-03-20 16:55:44 - app.api.ai_proxy - INFO - AI response success: True
+backend      | 2026-03-21 02:55:44.179 | 2026-03-20 16:55:44 - app.api.ai_proxy - INFO - AI response keys: ['user_prompt', 'difficulty', 'depth_limit', 'user_id', 'outline_prompt', 'course_outline', '_llm_usage', 'course_outline_parsed', 'structure', 'course_title', 'course_description']
+backend      | 2026-03-21 02:55:44.180 | INFO:     172.19.0.1:40934 - "POST /api/v1/ai/generate/structure HTTP/1.1" 200 OK
+backend      | 2026-03-21 02:55:44.205 | INFO:     172.19.0.1:40934 - "POST /api/v1/courses HTTP/1.1" 201 Created
+backend      | 2026-03-21 02:55:44.215 | INFO:     172.19.0.1:40934 - "OPTIONS /api/v1/courses/8be2cd47-189b-4eeb-b2c2-8fcf89832a9d/nodes/batch HTTP/1.1" 200 OK
+backend      | 2026-03-21 02:55:44.267 | 2026-03-20 16:55:44 - app.api.courses - INFO - Batch create nodes request for course 8be2cd47-189b-4eeb-b2c2-8fcf89832a9d
+backend      | 2026-03-21 02:55:44.267 | 2026-03-20 16:55:44 - app.api.courses - INFO - Nodes to create: 66
+backend      | 2026-03-21 02:55:44.267 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 0: id=6f10549c-33c1-4e10-909c-ac3f2fa34a20, title=Введение в DevOps, type=topic, parent_id=None
+backend      | 2026-03-21 02:55:44.267 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 1: id=b0536c8d-6e8e-4472-a25d-320b6a0dbda1, title=Философия DevOps, type=theory, parent_id=6f10549c-33c1-4e10-909c-ac3f2fa34a20
+backend      | 2026-03-21 02:55:44.267 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 2: id=bcf21be1-23fb-4008-8efa-fc4461236578, title=Жизненный цикл разработки, type=theory, parent_id=6f10549c-33c1-4e10-909c-ac3f2fa34a20
+backend      | 2026-03-21 02:55:44.267 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 3: id=0a714904-5e04-4b32-9180-8f74a6620526, title=Карьерный переход из сопровождения в DevOps, type=theory, parent_id=6f10549c-33c1-4e10-909c-ac3f2fa34a20
+backend      | 2026-03-21 02:55:44.267 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 4: id=1681eed3-25be-4e9f-bf98-31033c0045a4, title=Система контроля версий Git, type=topic, parent_id=None
+backend      | 2026-03-21 02:55:44.267 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 5: id=6392091a-f025-48d6-bc9b-a7d2f2aec46f, title=Основы Git, type=theory, parent_id=1681eed3-25be-4e9f-bf98-31033c0045a4
+backend      | 2026-03-21 02:55:44.267 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 6: id=e956c6e5-16e4-4e2d-9185-956b37ce9332, title=Работа с удалёнными репозиториями, type=theory, parent_id=1681eed3-25be-4e9f-bf98-31033c0045a4
+backend      | 2026-03-21 02:55:44.267 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 7: id=ba6ea671-aa87-48db-94ea-b62025b7aed5, title=Практика работы с Git, type=practice, parent_id=1681eed3-25be-4e9f-bf98-31033c0045a4
+backend      | 2026-03-21 02:55:44.267 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 8: id=0973f831-8986-4c82-9964-51b71bbae7d0, title=GitFlow и стратегии ветвления, type=theory, parent_id=1681eed3-25be-4e9f-bf98-31033c0045a4
+backend      | 2026-03-21 02:55:44.267 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 9: id=f4db7cab-3e6c-4421-8044-643e91abbcd9, title=Контейнеризация с Docker, type=topic, parent_id=None
+backend      | 2026-03-21 02:55:44.267 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 10: id=c2a1302d-5efd-4af4-9be1-002bb00b9bf9, title=Концепция контейнеризации, type=theory, parent_id=f4db7cab-3e6c-4421-8044-643e91abbcd9
+backend      | 2026-03-21 02:55:44.267 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 11: id=ac1ba750-73b1-4389-923b-63b8e41d4852, title=Основы Docker, type=theory, parent_id=f4db7cab-3e6c-4421-8044-643e91abbcd9
+backend      | 2026-03-21 02:55:44.267 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 12: id=7cdaf079-f6f2-4e36-8f3d-4eb4b60a2baa, title=Создание Dockerfile, type=practice, parent_id=f4db7cab-3e6c-4421-8044-643e91abbcd9
+backend      | 2026-03-21 02:55:44.267 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 13: id=84e0be35-6f88-424f-9452-3011e58cf48e, title=Работа с Docker Compose, type=theory, parent_id=f4db7cab-3e6c-4421-8044-643e91abbcd9
+backend      | 2026-03-21 02:55:44.267 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 14: id=4030aacb-ba94-4f8b-9e30-ad26db8ccaf1, title=Практика Docker Compose, type=practice, parent_id=f4db7cab-3e6c-4421-8044-643e91abbcd9
+backend      | 2026-03-21 02:55:44.267 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 15: id=6e33f9f8-7c57-4a80-9457-f4d124d09762, title=Сети и хранилище в Docker, type=theory, parent_id=f4db7cab-3e6c-4421-8044-643e91abbcd9
+backend      | 2026-03-21 02:55:44.267 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 16: id=c04302c2-b028-432f-a1b0-1affd723b868, title=Непрерывная интеграция и доставка (CI/CD), type=topic, parent_id=None
+backend      | 2026-03-21 02:55:44.267 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 17: id=36b9ecf0-4359-402d-be7d-3871632b7620, title=Принципы CI/CD, type=theory, parent_id=c04302c2-b028-432f-a1b0-1affd723b868
+backend      | 2026-03-21 02:55:44.267 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 18: id=45d6582f-8b32-4e79-9a14-698c2b12093c, title=Jenkins - настройка и использование, type=theory, parent_id=c04302c2-b028-432f-a1b0-1affd723b868
+backend      | 2026-03-21 02:55:44.267 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 19: id=b2acc95d-81f3-43fc-be79-963722e56859, title=Создание Jenkinsfile, type=practice, parent_id=c04302c2-b028-432f-a1b0-1affd723b868
+backend      | 2026-03-21 02:55:44.267 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 20: id=8600f07f-3125-4cbe-985c-a3b5ed112386, title=GitHub Actions, type=theory, parent_id=c04302c2-b028-432f-a1b0-1affd723b868
+backend      | 2026-03-21 02:55:44.267 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 21: id=e8f55c8b-3567-434e-bed9-57254317e6c6, title=GitLab CI, type=theory, parent_id=c04302c2-b028-432f-a1b0-1affd723b868
+backend      | 2026-03-21 02:55:44.267 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 22: id=086fe3ec-38f5-4478-b93c-4cd29fda6b96, title=Практика GitLab CI, type=practice, parent_id=c04302c2-b028-432f-a1b0-1affd723b868
+backend      | 2026-03-21 02:55:44.267 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 23: id=c2fab960-c37e-4b39-bc55-aac698212b64, title=Оркестрация контейнеров Kubernetes, type=topic, parent_id=None
+backend      | 2026-03-21 02:55:44.267 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 24: id=73ab703a-8bac-42d1-9555-4d81d6fe6805, title=Введение в Kubernetes, type=theory, parent_id=c2fab960-c37e-4b39-bc55-aac698212b64
+backend      | 2026-03-21 02:55:44.267 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 25: id=ccdd3949-c53a-4b5a-98be-aa78a15ba8a7, title=Основные объекты K8s, type=theory, parent_id=c2fab960-c37e-4b39-bc55-aac698212b64
+backend      | 2026-03-21 02:55:44.267 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 26: id=86da151f-397b-4650-bab8-1ff815ba1311, title=Практика создания Deployment, type=practice, parent_id=c2fab960-c37e-4b39-bc55-aac698212b64
+backend      | 2026-03-21 02:55:44.268 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 27: id=7b9224f7-6f61-418c-8a50-b26c41a76f91, title=Services и Ingress, type=theory, parent_id=c2fab960-c37e-4b39-bc55-aac698212b64
+backend      | 2026-03-21 02:55:44.268 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 28: id=78cc36de-0dfa-486e-98a5-55be30691845, title=Конфигурации и секреты, type=theory, parent_id=c2fab960-c37e-4b39-bc55-aac698212b64
+backend      | 2026-03-21 02:55:44.268 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 29: id=f93299c8-49c4-429b-b8fe-250e75d8b262, title=Helm - менеджер пакетов, type=theory, parent_id=c2fab960-c37e-4b39-bc55-aac698212b64
+backend      | 2026-03-21 02:55:44.268 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 30: id=041ce4d2-c68c-493f-90c9-ba170379b04a, title=Практика с Helm, type=practice, parent_id=c2fab960-c37e-4b39-bc55-aac698212b64
+backend      | 2026-03-21 02:55:44.268 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 31: id=74861160-fccf-4423-bff8-e326ed4fe1df, title=Infrastructure as Code (IaC), type=topic, parent_id=None
+backend      | 2026-03-21 02:55:44.268 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 32: id=181bd51b-0cd8-4964-9b40-8b61aea8161c, title=Концепция IaC, type=theory, parent_id=74861160-fccf-4423-bff8-e326ed4fe1df
+backend      | 2026-03-21 02:55:44.268 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 33: id=08594ec6-e41b-4de7-a960-1227a01c734f, title=Terraform - основы, type=theory, parent_id=74861160-fccf-4423-bff8-e326ed4fe1df
+backend      | 2026-03-21 02:55:44.268 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 34: id=4f474788-01c6-4b21-b01e-1b089d35c01b, title=Практика Terraform, type=practice, parent_id=74861160-fccf-4423-bff8-e326ed4fe1df
+backend      | 2026-03-21 02:55:44.268 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 35: id=8c1f0d47-a9b5-4d2f-a579-558baae54878, title=Ansible - основы, type=theory, parent_id=74861160-fccf-4423-bff8-e326ed4fe1df
+backend      | 2026-03-21 02:55:44.268 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 36: id=2c8c55e1-f3da-4ccc-a1c6-0bb672be9dec, title=Написание Ansible-плейбуков, type=practice, parent_id=74861160-fccf-4423-bff8-e326ed4fe1df
+backend      | 2026-03-21 02:55:44.268 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 37: id=ab651d02-1e41-4d0c-a3e6-1b97cb3be6b5, title=Интеграция Terraform и Ansible, type=theory, parent_id=74861160-fccf-4423-bff8-e326ed4fe1df
+backend      | 2026-03-21 02:55:44.268 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 38: id=70598f68-dd9b-43cd-9b79-77136876bed8, title=Облачные платформы, type=topic, parent_id=None
+backend      | 2026-03-21 02:55:44.268 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 39: id=55ccf337-cb76-4c15-aee3-9ea0eb1469bf, title=Обзор облачных провайдеров, type=theory, parent_id=70598f68-dd9b-43cd-9b79-77136876bed8
+backend      | 2026-03-21 02:55:44.268 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 40: id=56482f48-38cd-4870-a1ba-10e430da5865, title=AWS для DevOps, type=theory, parent_id=70598f68-dd9b-43cd-9b79-77136876bed8
+backend      | 2026-03-21 02:55:44.268 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 41: id=22526204-af04-4f83-9e07-609a6d0a5f9e, title=Практика AWS, type=practice, parent_id=70598f68-dd9b-43cd-9b79-77136876bed8
+backend      | 2026-03-21 02:55:44.268 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 42: id=bd9a0a16-2c6a-4ecf-a278-d4beaf0b5a9d, title=Google Cloud Platform, type=theory, parent_id=70598f68-dd9b-43cd-9b79-77136876bed8
+backend      | 2026-03-21 02:55:44.268 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 43: id=2891ab4a-a043-494a-8f92-c4a399f39408, title=Мульicloud стратегии, type=theory, parent_id=70598f68-dd9b-43cd-9b79-77136876bed8
+backend      | 2026-03-21 02:55:44.268 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 44: id=8a888477-33d6-4056-af32-0acde22c2c5b, title=Мониторинг и логирование, type=topic, parent_id=None
+backend      | 2026-03-21 02:55:44.268 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 45: id=e2b7c9e3-1dc5-46bb-9452-53f588d25445, title=Принципы наблюдаемости, type=theory, parent_id=8a888477-33d6-4056-af32-0acde22c2c5b
+backend      | 2026-03-21 02:55:44.268 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 46: id=25e85efb-2e51-4f00-93f1-6c6adf1e1dff, title=Prometheus и Grafana, type=theory, parent_id=8a888477-33d6-4056-af32-0acde22c2c5b
+backend      | 2026-03-21 02:55:44.268 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 47: id=472fbc98-e555-459d-afe4-069c13219647, title=Практика мониторинга, type=practice, parent_id=8a888477-33d6-4056-af32-0acde22c2c5b
+backend      | 2026-03-21 02:55:44.268 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 48: id=a05b743c-8e37-4cd3-956f-009bcd569487, title=Централизованное логирование, type=theory, parent_id=8a888477-33d6-4056-af32-0acde22c2c5b
+backend      | 2026-03-21 02:55:44.268 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 49: id=1feef702-548c-4af3-9393-7ad30c2a3873, title=Настройка ELK-стека, type=practice, parent_id=8a888477-33d6-4056-af32-0acde22c2c5b
+backend      | 2026-03-21 02:55:44.268 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 50: id=7e531589-9c1a-4a8b-b1bd-64d4da34aa5c, title=Трейсинг с Jaeger, type=theory, parent_id=8a888477-33d6-4056-af32-0acde22c2c5b
+backend      | 2026-03-21 02:55:44.268 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 51: id=7b867e5c-103f-419f-9e9b-2a90a185f1de, title=Безопасность в DevOps (DevSecOps), type=topic, parent_id=None
+backend      | 2026-03-21 02:55:44.268 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 52: id=17d0ecda-f6a6-471b-a97a-43e6542bdc04, title=Основы DevSecOps, type=theory, parent_id=7b867e5c-103f-419f-9e9b-2a90a185f1de
+backend      | 2026-03-21 02:55:44.269 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 53: id=60cdef95-2451-409b-be0a-a8b2d2b6f5ac, title=Сканирование уязвимостей, type=theory, parent_id=7b867e5c-103f-419f-9e9b-2a90a185f1de
+backend      | 2026-03-21 02:55:44.269 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 54: id=c7bb2968-aaad-4122-a691-4307a2467b67, title=Безопасность контейнеров, type=theory, parent_id=7b867e5c-103f-419f-9e9b-2a90a185f1de
+backend      | 2026-03-21 02:55:44.269 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 55: id=4b2abd24-f853-4a1d-a319-a1ecc52fa1bf, title=Практика сканирования, type=practice, parent_id=7b867e5c-103f-419f-9e9b-2a90a185f1de
+backend      | 2026-03-21 02:55:44.269 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 56: id=e599bbd7-e2a5-401d-9e14-955ee7c85696, title=Управление секретами, type=theory, parent_id=7b867e5c-103f-419f-9e9b-2a90a185f1de
+backend      | 2026-03-21 02:55:44.269 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 57: id=3764c0cd-ad2f-4b27-8f1d-8050fc7e8894, title=Скриптинг и автоматизация, type=topic, parent_id=None
+backend      | 2026-03-21 02:55:44.269 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 58: id=0b0751d6-25bf-4ce8-9545-66a4443a7b0f, title=Bash-скриптирование, type=theory, parent_id=3764c0cd-ad2f-4b27-8f1d-8050fc7e8894
+backend      | 2026-03-21 02:55:44.269 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 59: id=469d843e-ee97-4ec4-8fb2-ea8b444b440e, title=Практика Bash, type=practice, parent_id=3764c0cd-ad2f-4b27-8f1d-8050fc7e8894
+backend      | 2026-03-21 02:55:44.269 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 60: id=7d72cc9a-f59f-4bf9-bc58-f7760117d6f1, title=Python для DevOps, type=theory, parent_id=3764c0cd-ad2f-4b27-8f1d-8050fc7e8894
+backend      | 2026-03-21 02:55:44.269 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 61: id=081fd5c4-878d-4bf8-b3eb-217f3b7d20b9, title=Практика Python, type=practice, parent_id=3764c0cd-ad2f-4b27-8f1d-8050fc7e8894
+backend      | 2026-03-21 02:55:44.269 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 62: id=5004215c-bd46-445a-a9d5-23986551ef1d, title=Проектная работа, type=topic, parent_id=None
+backend      | 2026-03-21 02:55:44.269 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 63: id=36b69ff4-1976-440e-a8a9-230ce9987315, title=Проектирование инфраструктуры, type=theory, parent_id=5004215c-bd46-445a-a9d5-23986551ef1d
+backend      | 2026-03-21 02:55:44.269 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 64: id=6a3fc4cf-8b56-4cd2-af1f-7aedc0d9792f, title=Реализация проекта, type=practice, parent_id=5004215c-bd46-445a-a9d5-23986551ef1d
+backend      | 2026-03-21 02:55:44.269 | 2026-03-20 16:55:44 - app.api.courses - INFO -   Node 65: id=4ba762e3-81f4-4336-b7ba-0ef5631ff460, title=Документация и презентация, type=practice, parent_id=5004215c-bd46-445a-a9d5-23986551ef1d
+backend      | 2026-03-21 02:55:44.270 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 6f10549c-33c1-4e10-909c-ac3f2fa34a20 -> DB id 6f10549c-33c1-4e10-909c-ac3f2fa34a20
+backend      | 2026-03-21 02:55:44.270 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id b0536c8d-6e8e-4472-a25d-320b6a0dbda1 -> DB id b0536c8d-6e8e-4472-a25d-320b6a0dbda1
+backend      | 2026-03-21 02:55:44.270 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id bcf21be1-23fb-4008-8efa-fc4461236578 -> DB id bcf21be1-23fb-4008-8efa-fc4461236578
+backend      | 2026-03-21 02:55:44.270 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 0a714904-5e04-4b32-9180-8f74a6620526 -> DB id 0a714904-5e04-4b32-9180-8f74a6620526
+backend      | 2026-03-21 02:55:44.271 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 1681eed3-25be-4e9f-bf98-31033c0045a4 -> DB id 1681eed3-25be-4e9f-bf98-31033c0045a4
+backend      | 2026-03-21 02:55:44.271 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 6392091a-f025-48d6-bc9b-a7d2f2aec46f -> DB id 6392091a-f025-48d6-bc9b-a7d2f2aec46f
+backend      | 2026-03-21 02:55:44.271 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id e956c6e5-16e4-4e2d-9185-956b37ce9332 -> DB id e956c6e5-16e4-4e2d-9185-956b37ce9332
+backend      | 2026-03-21 02:55:44.271 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id ba6ea671-aa87-48db-94ea-b62025b7aed5 -> DB id ba6ea671-aa87-48db-94ea-b62025b7aed5
+backend      | 2026-03-21 02:55:44.271 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 0973f831-8986-4c82-9964-51b71bbae7d0 -> DB id 0973f831-8986-4c82-9964-51b71bbae7d0
+backend      | 2026-03-21 02:55:44.271 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id f4db7cab-3e6c-4421-8044-643e91abbcd9 -> DB id f4db7cab-3e6c-4421-8044-643e91abbcd9
+backend      | 2026-03-21 02:55:44.271 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id c2a1302d-5efd-4af4-9be1-002bb00b9bf9 -> DB id c2a1302d-5efd-4af4-9be1-002bb00b9bf9
+backend      | 2026-03-21 02:55:44.271 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id ac1ba750-73b1-4389-923b-63b8e41d4852 -> DB id ac1ba750-73b1-4389-923b-63b8e41d4852
+backend      | 2026-03-21 02:55:44.271 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 7cdaf079-f6f2-4e36-8f3d-4eb4b60a2baa -> DB id 7cdaf079-f6f2-4e36-8f3d-4eb4b60a2baa
+backend      | 2026-03-21 02:55:44.271 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 84e0be35-6f88-424f-9452-3011e58cf48e -> DB id 84e0be35-6f88-424f-9452-3011e58cf48e
+backend      | 2026-03-21 02:55:44.272 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 4030aacb-ba94-4f8b-9e30-ad26db8ccaf1 -> DB id 4030aacb-ba94-4f8b-9e30-ad26db8ccaf1
+backend      | 2026-03-21 02:55:44.272 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 6e33f9f8-7c57-4a80-9457-f4d124d09762 -> DB id 6e33f9f8-7c57-4a80-9457-f4d124d09762
+backend      | 2026-03-21 02:55:44.272 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id c04302c2-b028-432f-a1b0-1affd723b868 -> DB id c04302c2-b028-432f-a1b0-1affd723b868
+backend      | 2026-03-21 02:55:44.272 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 36b9ecf0-4359-402d-be7d-3871632b7620 -> DB id 36b9ecf0-4359-402d-be7d-3871632b7620
+backend      | 2026-03-21 02:55:44.272 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 45d6582f-8b32-4e79-9a14-698c2b12093c -> DB id 45d6582f-8b32-4e79-9a14-698c2b12093c
+backend      | 2026-03-21 02:55:44.272 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id b2acc95d-81f3-43fc-be79-963722e56859 -> DB id b2acc95d-81f3-43fc-be79-963722e56859
+backend      | 2026-03-21 02:55:44.272 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 8600f07f-3125-4cbe-985c-a3b5ed112386 -> DB id 8600f07f-3125-4cbe-985c-a3b5ed112386
+backend      | 2026-03-21 02:55:44.272 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id e8f55c8b-3567-434e-bed9-57254317e6c6 -> DB id e8f55c8b-3567-434e-bed9-57254317e6c6
+backend      | 2026-03-21 02:55:44.272 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 086fe3ec-38f5-4478-b93c-4cd29fda6b96 -> DB id 086fe3ec-38f5-4478-b93c-4cd29fda6b96
+backend      | 2026-03-21 02:55:44.272 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id c2fab960-c37e-4b39-bc55-aac698212b64 -> DB id c2fab960-c37e-4b39-bc55-aac698212b64
+backend      | 2026-03-21 02:55:44.273 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 73ab703a-8bac-42d1-9555-4d81d6fe6805 -> DB id 73ab703a-8bac-42d1-9555-4d81d6fe6805
+backend      | 2026-03-21 02:55:44.273 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id ccdd3949-c53a-4b5a-98be-aa78a15ba8a7 -> DB id ccdd3949-c53a-4b5a-98be-aa78a15ba8a7
+backend      | 2026-03-21 02:55:44.273 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 86da151f-397b-4650-bab8-1ff815ba1311 -> DB id 86da151f-397b-4650-bab8-1ff815ba1311
+backend      | 2026-03-21 02:55:44.273 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 7b9224f7-6f61-418c-8a50-b26c41a76f91 -> DB id 7b9224f7-6f61-418c-8a50-b26c41a76f91
+backend      | 2026-03-21 02:55:44.273 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 78cc36de-0dfa-486e-98a5-55be30691845 -> DB id 78cc36de-0dfa-486e-98a5-55be30691845
+backend      | 2026-03-21 02:55:44.273 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id f93299c8-49c4-429b-b8fe-250e75d8b262 -> DB id f93299c8-49c4-429b-b8fe-250e75d8b262
+backend      | 2026-03-21 02:55:44.273 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 041ce4d2-c68c-493f-90c9-ba170379b04a -> DB id 041ce4d2-c68c-493f-90c9-ba170379b04a
+backend      | 2026-03-21 02:55:44.273 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 74861160-fccf-4423-bff8-e326ed4fe1df -> DB id 74861160-fccf-4423-bff8-e326ed4fe1df
+backend      | 2026-03-21 02:55:44.273 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 181bd51b-0cd8-4964-9b40-8b61aea8161c -> DB id 181bd51b-0cd8-4964-9b40-8b61aea8161c
+backend      | 2026-03-21 02:55:44.273 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 08594ec6-e41b-4de7-a960-1227a01c734f -> DB id 08594ec6-e41b-4de7-a960-1227a01c734f
+backend      | 2026-03-21 02:55:44.274 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 4f474788-01c6-4b21-b01e-1b089d35c01b -> DB id 4f474788-01c6-4b21-b01e-1b089d35c01b
+backend      | 2026-03-21 02:55:44.274 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 8c1f0d47-a9b5-4d2f-a579-558baae54878 -> DB id 8c1f0d47-a9b5-4d2f-a579-558baae54878
+backend      | 2026-03-21 02:55:44.274 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 2c8c55e1-f3da-4ccc-a1c6-0bb672be9dec -> DB id 2c8c55e1-f3da-4ccc-a1c6-0bb672be9dec
+backend      | 2026-03-21 02:55:44.274 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id ab651d02-1e41-4d0c-a3e6-1b97cb3be6b5 -> DB id ab651d02-1e41-4d0c-a3e6-1b97cb3be6b5
+backend      | 2026-03-21 02:55:44.274 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 70598f68-dd9b-43cd-9b79-77136876bed8 -> DB id 70598f68-dd9b-43cd-9b79-77136876bed8
+backend      | 2026-03-21 02:55:44.274 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 55ccf337-cb76-4c15-aee3-9ea0eb1469bf -> DB id 55ccf337-cb76-4c15-aee3-9ea0eb1469bf
+backend      | 2026-03-21 02:55:44.274 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 56482f48-38cd-4870-a1ba-10e430da5865 -> DB id 56482f48-38cd-4870-a1ba-10e430da5865
+backend      | 2026-03-21 02:55:44.274 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 22526204-af04-4f83-9e07-609a6d0a5f9e -> DB id 22526204-af04-4f83-9e07-609a6d0a5f9e
+backend      | 2026-03-21 02:55:44.274 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id bd9a0a16-2c6a-4ecf-a278-d4beaf0b5a9d -> DB id bd9a0a16-2c6a-4ecf-a278-d4beaf0b5a9d
+backend      | 2026-03-21 02:55:44.274 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 2891ab4a-a043-494a-8f92-c4a399f39408 -> DB id 2891ab4a-a043-494a-8f92-c4a399f39408
+backend      | 2026-03-21 02:55:44.274 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 8a888477-33d6-4056-af32-0acde22c2c5b -> DB id 8a888477-33d6-4056-af32-0acde22c2c5b
+backend      | 2026-03-21 02:55:44.275 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id e2b7c9e3-1dc5-46bb-9452-53f588d25445 -> DB id e2b7c9e3-1dc5-46bb-9452-53f588d25445
+backend      | 2026-03-21 02:55:44.275 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 25e85efb-2e51-4f00-93f1-6c6adf1e1dff -> DB id 25e85efb-2e51-4f00-93f1-6c6adf1e1dff
+backend      | 2026-03-21 02:55:44.275 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 472fbc98-e555-459d-afe4-069c13219647 -> DB id 472fbc98-e555-459d-afe4-069c13219647
+backend      | 2026-03-21 02:55:44.275 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id a05b743c-8e37-4cd3-956f-009bcd569487 -> DB id a05b743c-8e37-4cd3-956f-009bcd569487
+backend      | 2026-03-21 02:55:44.275 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 1feef702-548c-4af3-9393-7ad30c2a3873 -> DB id 1feef702-548c-4af3-9393-7ad30c2a3873
+backend      | 2026-03-21 02:55:44.275 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 7e531589-9c1a-4a8b-b1bd-64d4da34aa5c -> DB id 7e531589-9c1a-4a8b-b1bd-64d4da34aa5c
+backend      | 2026-03-21 02:55:44.275 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 7b867e5c-103f-419f-9e9b-2a90a185f1de -> DB id 7b867e5c-103f-419f-9e9b-2a90a185f1de
+backend      | 2026-03-21 02:55:44.275 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 17d0ecda-f6a6-471b-a97a-43e6542bdc04 -> DB id 17d0ecda-f6a6-471b-a97a-43e6542bdc04
+backend      | 2026-03-21 02:55:44.275 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 60cdef95-2451-409b-be0a-a8b2d2b6f5ac -> DB id 60cdef95-2451-409b-be0a-a8b2d2b6f5ac
+backend      | 2026-03-21 02:55:44.275 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id c7bb2968-aaad-4122-a691-4307a2467b67 -> DB id c7bb2968-aaad-4122-a691-4307a2467b67
+backend      | 2026-03-21 02:55:44.276 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 4b2abd24-f853-4a1d-a319-a1ecc52fa1bf -> DB id 4b2abd24-f853-4a1d-a319-a1ecc52fa1bf
+backend      | 2026-03-21 02:55:44.276 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id e599bbd7-e2a5-401d-9e14-955ee7c85696 -> DB id e599bbd7-e2a5-401d-9e14-955ee7c85696
+backend      | 2026-03-21 02:55:44.276 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 3764c0cd-ad2f-4b27-8f1d-8050fc7e8894 -> DB id 3764c0cd-ad2f-4b27-8f1d-8050fc7e8894
+backend      | 2026-03-21 02:55:44.276 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 0b0751d6-25bf-4ce8-9545-66a4443a7b0f -> DB id 0b0751d6-25bf-4ce8-9545-66a4443a7b0f
+backend      | 2026-03-21 02:55:44.276 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 469d843e-ee97-4ec4-8fb2-ea8b444b440e -> DB id 469d843e-ee97-4ec4-8fb2-ea8b444b440e
+backend      | 2026-03-21 02:55:44.276 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 7d72cc9a-f59f-4bf9-bc58-f7760117d6f1 -> DB id 7d72cc9a-f59f-4bf9-bc58-f7760117d6f1
+backend      | 2026-03-21 02:55:44.276 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 081fd5c4-878d-4bf8-b3eb-217f3b7d20b9 -> DB id 081fd5c4-878d-4bf8-b3eb-217f3b7d20b9
+backend      | 2026-03-21 02:55:44.276 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 5004215c-bd46-445a-a9d5-23986551ef1d -> DB id 5004215c-bd46-445a-a9d5-23986551ef1d
+backend      | 2026-03-21 02:55:44.276 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 36b69ff4-1976-440e-a8a9-230ce9987315 -> DB id 36b69ff4-1976-440e-a8a9-230ce9987315
+backend      | 2026-03-21 02:55:44.277 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 6a3fc4cf-8b56-4cd2-af1f-7aedc0d9792f -> DB id 6a3fc4cf-8b56-4cd2-af1f-7aedc0d9792f
+backend      | 2026-03-21 02:55:44.277 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created node with frontend id 4ba762e3-81f4-4336-b7ba-0ef5631ff460 -> DB id 4ba762e3-81f4-4336-b7ba-0ef5631ff460
+backend      | 2026-03-21 02:55:44.286 | 2026-03-20 16:55:44 - app.api.courses - INFO - Created 66 nodes in database
+backend      | 2026-03-21 02:55:44.314 | 2026-03-20 16:55:44 - app.api.courses - INFO - Batch create completed successfully
+backend      | 2026-03-21 02:55:44.315 | INFO:     172.19.0.1:40934 - "POST /api/v1/courses/8be2cd47-189b-4eeb-b2c2-8fcf89832a9d/nodes/batch HTTP/1.1" 201 Created
+backend      | 2026-03-21 02:55:44.333 | INFO:     172.19.0.1:40934 - "GET /api/v1/courses HTTP/1.1" 200 OK
+postgres     | 2026-03-21 02:58:03.956 | 2026-03-20 16:58:03.955 UTC [27] LOG:  checkpoint starting: time
+postgres     | 2026-03-21 02:58:11.111 | 2026-03-20 16:58:11.110 UTC [27] LOG:  checkpoint complete: wrote 74 buffers (0.5%); 0 WAL file(s) added, 0 removed, 0 recycled; write=7.127 s, sync=0.018 s, total=7.156 s; sync files=28, longest=0.003 s, average=0.001 s; distance=295 kB, estimate=295 kB; lsn=0/19AF828, redo lsn=0/19AF7F0
+frontend     | 2026-03-21 03:02:17.027 |  GET /course/8be2cd47-189b-4eeb-b2c2-8fcf89832a9d 200 in 1194ms (compile: 1047ms, proxy.ts: 8ms, render: 139ms)
+backend      | 2026-03-21 03:02:17.590 | INFO:     172.19.0.1:48284 - "OPTIONS /api/v1/courses/8be2cd47-189b-4eeb-b2c2-8fcf89832a9d HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:17.596 | INFO:     172.19.0.1:48298 - "GET /api/v1/auth/me HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:17.605 | INFO:     172.19.0.1:48284 - "GET /api/v1/courses/8be2cd47-189b-4eeb-b2c2-8fcf89832a9d HTTP/1.1" 200 OK
+frontend     | 2026-03-21 03:02:27.758 |  GET /lesson/b0536c8d-6e8e-4472-a25d-320b6a0dbda1/theory 200 in 1040ms (compile: 995ms, proxy.ts: 9ms, render: 36ms)
+backend      | 2026-03-21 03:02:27.832 | INFO:     172.19.0.1:59504 - "OPTIONS /api/v1/courses/nodes/b0536c8d-6e8e-4472-a25d-320b6a0dbda1 HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:27.832 | INFO:     172.19.0.1:59512 - "OPTIONS /api/v1/courses/nodes/b0536c8d-6e8e-4472-a25d-320b6a0dbda1 HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:27.846 | INFO:     172.19.0.1:59504 - "GET /api/v1/courses/nodes/b0536c8d-6e8e-4472-a25d-320b6a0dbda1 HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:27.859 | INFO:     172.19.0.1:59512 - "GET /api/v1/courses/nodes/b0536c8d-6e8e-4472-a25d-320b6a0dbda1 HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:27.884 | INFO:     172.19.0.1:59504 - "GET /api/v1/courses/8be2cd47-189b-4eeb-b2c2-8fcf89832a9d HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:27.891 | INFO:     172.19.0.1:59504 - "OPTIONS /api/v1/ai/generate/content?content_type=theory HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:27.894 | INFO:     172.19.0.1:59512 - "GET /api/v1/courses/8be2cd47-189b-4eeb-b2c2-8fcf89832a9d HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:27.900 | 2026-03-20 17:02:27 - app.api.ai_proxy - INFO - Generating theory content for node b0536c8d-6e8e-4472-a25d-320b6a0dbda1
+backend      | 2026-03-21 03:02:27.903 | 2026-03-20 17:02:27 - app.api.ai_proxy - INFO - Generating theory content for node b0536c8d-6e8e-4472-a25d-320b6a0dbda1
+backend      | 2026-03-21 03:02:27.905 | 2026-03-20 17:02:27 - app.api.ai_proxy - INFO - Context for node b0536c8d-6e8e-4472-a25d-320b6a0dbda1: language=ru
+backend      | 2026-03-21 03:02:27.905 | 2026-03-20 17:02:27 - app.api.ai_proxy - INFO - Context summary:
+backend      | 2026-03-21 03:02:27.905 | Курс: Введение в DevOps
+backend      | 2026-03-21 03:02:27.905 | Язык контента: Русский
+backend      | 2026-03-21 03:02:27.905 | Предыдущий урок: Работа с удалёнными репозиториями (theory)
+backend      | 2026-03-21 03:02:27.905 | Тема раздела: Введение в DevOps
+backend      | 2026-03-21 03:02:27.905 | Следующий урок: Реализация проекта (practice)
+backend      | 2026-03-21 03:02:27.913 | 2026-03-20 17:02:27 - app.api.ai_proxy - INFO - Context for node b0536c8d-6e8e-4472-a25d-320b6a0dbda1: language=ru
+backend      | 2026-03-21 03:02:27.914 | 2026-03-20 17:02:27 - app.api.ai_proxy - INFO - Context summary:
+backend      | 2026-03-21 03:02:27.914 | Курс: Введение в DevOps
+backend      | 2026-03-21 03:02:27.914 | Язык контента: Русский
+backend      | 2026-03-21 03:02:27.914 | Предыдущий урок: Работа с удалёнными репозиториями (theory)
+backend      | 2026-03-21 03:02:27.914 | Тема раздела: Введение в DevOps
+backend      | 2026-03-21 03:02:27.914 | Следующий урок: Реализация проекта (practice)
+ai-framework | 2026-03-21 03:02:27.917 | INFO:     172.19.0.4:56018 - "POST /execute HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:27.920 | 2026-03-20 17:02:27 - httpx - INFO - HTTP Request: POST http://ai-framework:8000/execute "HTTP/1.1 200 OK"
+backend      | 2026-03-21 03:02:27.921 | INFO:     172.19.0.1:59504 - "POST /api/v1/ai/generate/content?content_type=theory HTTP/1.1" 200 OK
+ai-framework | 2026-03-21 03:02:27.923 | INFO:     172.19.0.4:56020 - "POST /execute HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:27.923 | 2026-03-20 17:02:27 - httpx - INFO - HTTP Request: POST http://ai-framework:8000/execute "HTTP/1.1 200 OK"
+backend      | 2026-03-21 03:02:27.924 | INFO:     172.19.0.1:59512 - "POST /api/v1/ai/generate/content?content_type=theory HTTP/1.1" 200 OK
+frontend     | 2026-03-21 03:02:37.729 |  GET /course/8be2cd47-189b-4eeb-b2c2-8fcf89832a9d 200 in 119ms (compile: 80ms, proxy.ts: 7ms, render: 33ms)
+backend      | 2026-03-21 03:02:37.762 | INFO:     172.19.0.1:44622 - "GET /api/v1/courses/8be2cd47-189b-4eeb-b2c2-8fcf89832a9d HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:37.774 | INFO:     172.19.0.1:44630 - "GET /api/v1/courses/8be2cd47-189b-4eeb-b2c2-8fcf89832a9d HTTP/1.1" 200 OK
+frontend     | 2026-03-21 03:02:39.427 |  GET /lesson/b0536c8d-6e8e-4472-a25d-320b6a0dbda1/theory 200 in 115ms (compile: 77ms, proxy.ts: 5ms, render: 34ms)
+backend      | 2026-03-21 03:02:39.458 | INFO:     172.19.0.1:44630 - "GET /api/v1/courses/nodes/b0536c8d-6e8e-4472-a25d-320b6a0dbda1 HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:39.469 | INFO:     172.19.0.1:44622 - "GET /api/v1/courses/nodes/b0536c8d-6e8e-4472-a25d-320b6a0dbda1 HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:39.473 | INFO:     172.19.0.1:44630 - "GET /api/v1/courses/8be2cd47-189b-4eeb-b2c2-8fcf89832a9d HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:39.482 | INFO:     172.19.0.1:44622 - "GET /api/v1/courses/8be2cd47-189b-4eeb-b2c2-8fcf89832a9d HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:39.483 | 2026-03-20 17:02:39 - app.api.ai_proxy - INFO - Generating theory content for node b0536c8d-6e8e-4472-a25d-320b6a0dbda1
+backend      | 2026-03-21 03:02:39.486 | 2026-03-20 17:02:39 - app.api.ai_proxy - INFO - Context for node b0536c8d-6e8e-4472-a25d-320b6a0dbda1: language=ru
+backend      | 2026-03-21 03:02:39.486 | 2026-03-20 17:02:39 - app.api.ai_proxy - INFO - Context summary:
+backend      | 2026-03-21 03:02:39.486 | Курс: Введение в DevOps
+backend      | 2026-03-21 03:02:39.486 | Язык контента: Русский
+backend      | 2026-03-21 03:02:39.486 | Предыдущий урок: Работа с удалёнными репозиториями (theory)
+backend      | 2026-03-21 03:02:39.486 | Тема раздела: Введение в DevOps
+backend      | 2026-03-21 03:02:39.486 | Следующий урок: Реализация проекта (practice)
+backend      | 2026-03-21 03:02:39.492 | 2026-03-20 17:02:39 - app.api.ai_proxy - INFO - Generating theory content for node b0536c8d-6e8e-4472-a25d-320b6a0dbda1
+ai-framework | 2026-03-21 03:02:39.495 | INFO:     172.19.0.4:33836 - "POST /execute HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:39.495 | 2026-03-20 17:02:39 - httpx - INFO - HTTP Request: POST http://ai-framework:8000/execute "HTTP/1.1 200 OK"
+backend      | 2026-03-21 03:02:39.496 | 2026-03-20 17:02:39 - app.api.ai_proxy - INFO - Context for node b0536c8d-6e8e-4472-a25d-320b6a0dbda1: language=ru
+backend      | 2026-03-21 03:02:39.497 | 2026-03-20 17:02:39 - app.api.ai_proxy - INFO - Context summary:
+backend      | 2026-03-21 03:02:39.497 | Курс: Введение в DevOps
+backend      | 2026-03-21 03:02:39.497 | Язык контента: Русский
+backend      | 2026-03-21 03:02:39.497 | Предыдущий урок: Работа с удалёнными репозиториями (theory)
+backend      | 2026-03-21 03:02:39.497 | Тема раздела: Введение в DevOps
+backend      | 2026-03-21 03:02:39.497 | Следующий урок: Реализация проекта (practice)
+backend      | 2026-03-21 03:02:39.501 | INFO:     172.19.0.1:44630 - "POST /api/v1/ai/generate/content?content_type=theory HTTP/1.1" 200 OK
+ai-framework | 2026-03-21 03:02:39.505 | INFO:     172.19.0.4:33850 - "POST /execute HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:39.506 | 2026-03-20 17:02:39 - httpx - INFO - HTTP Request: POST http://ai-framework:8000/execute "HTTP/1.1 200 OK"
+backend      | 2026-03-21 03:02:39.507 | INFO:     172.19.0.1:44622 - "POST /api/v1/ai/generate/content?content_type=theory HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:43.938 | 2026-03-20 17:02:43 - app.api.ai_proxy - INFO - Generating theory content for node b0536c8d-6e8e-4472-a25d-320b6a0dbda1
+backend      | 2026-03-21 03:02:43.942 | 2026-03-20 17:02:43 - app.api.ai_proxy - INFO - Context for node b0536c8d-6e8e-4472-a25d-320b6a0dbda1: language=ru
+backend      | 2026-03-21 03:02:43.942 | 2026-03-20 17:02:43 - app.api.ai_proxy - INFO - Context summary:
+backend      | 2026-03-21 03:02:43.942 | Курс: Введение в DevOps
+backend      | 2026-03-21 03:02:43.942 | Язык контента: Русский
+backend      | 2026-03-21 03:02:43.942 | Предыдущий урок: Работа с удалёнными репозиториями (theory)
+backend      | 2026-03-21 03:02:43.942 | Тема раздела: Введение в DevOps
+backend      | 2026-03-21 03:02:43.942 | Следующий урок: Реализация проекта (practice)
+ai-framework | 2026-03-21 03:02:43.949 | INFO:     172.19.0.4:40244 - "POST /execute HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:43.949 | 2026-03-20 17:02:43 - httpx - INFO - HTTP Request: POST http://ai-framework:8000/execute "HTTP/1.1 200 OK"
+backend      | 2026-03-21 03:02:43.949 | INFO:     172.19.0.1:44622 - "POST /api/v1/ai/generate/content?content_type=theory HTTP/1.1" 200 OK
+frontend     | 2026-03-21 03:02:46.473 |  GET /lesson/bcf21be1-23fb-4008-8efa-fc4461236578/theory 200 in 108ms (compile: 73ms, proxy.ts: 5ms, render: 30ms)
+backend      | 2026-03-21 03:02:46.498 | INFO:     172.19.0.1:44622 - "OPTIONS /api/v1/courses/nodes/bcf21be1-23fb-4008-8efa-fc4461236578 HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:46.499 | INFO:     172.19.0.1:43882 - "OPTIONS /api/v1/courses/nodes/bcf21be1-23fb-4008-8efa-fc4461236578 HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:46.509 | INFO:     172.19.0.1:43882 - "GET /api/v1/courses/nodes/bcf21be1-23fb-4008-8efa-fc4461236578 HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:46.520 | INFO:     172.19.0.1:44622 - "GET /api/v1/courses/nodes/bcf21be1-23fb-4008-8efa-fc4461236578 HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:46.523 | INFO:     172.19.0.1:43882 - "GET /api/v1/courses/8be2cd47-189b-4eeb-b2c2-8fcf89832a9d HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:46.533 | INFO:     172.19.0.1:44622 - "GET /api/v1/courses/8be2cd47-189b-4eeb-b2c2-8fcf89832a9d HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:46.534 | 2026-03-20 17:02:46 - app.api.ai_proxy - INFO - Generating theory content for node bcf21be1-23fb-4008-8efa-fc4461236578
+backend      | 2026-03-21 03:02:46.536 | 2026-03-20 17:02:46 - app.api.ai_proxy - INFO - Context for node bcf21be1-23fb-4008-8efa-fc4461236578: language=ru
+backend      | 2026-03-21 03:02:46.536 | 2026-03-20 17:02:46 - app.api.ai_proxy - INFO - Context summary:
+backend      | 2026-03-21 03:02:46.536 | Курс: Введение в DevOps
+backend      | 2026-03-21 03:02:46.536 | Язык контента: Русский
+backend      | 2026-03-21 03:02:46.536 | Предыдущий урок: Основы Docker (theory)
+backend      | 2026-03-21 03:02:46.536 | Тема раздела: Введение в DevOps
+backend      | 2026-03-21 03:02:46.536 | Следующий урок: Практика Bash (practice)
+ai-framework | 2026-03-21 03:02:46.543 | INFO:     172.19.0.4:40254 - "POST /execute HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:46.543 | 2026-03-20 17:02:46 - httpx - INFO - HTTP Request: POST http://ai-framework:8000/execute "HTTP/1.1 200 OK"
+backend      | 2026-03-21 03:02:46.544 | INFO:     172.19.0.1:43882 - "POST /api/v1/ai/generate/content?content_type=theory HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:46.549 | 2026-03-20 17:02:46 - app.api.ai_proxy - INFO - Generating theory content for node bcf21be1-23fb-4008-8efa-fc4461236578
+backend      | 2026-03-21 03:02:46.553 | 2026-03-20 17:02:46 - app.api.ai_proxy - INFO - Context for node bcf21be1-23fb-4008-8efa-fc4461236578: language=ru
+backend      | 2026-03-21 03:02:46.553 | 2026-03-20 17:02:46 - app.api.ai_proxy - INFO - Context summary:
+backend      | 2026-03-21 03:02:46.553 | Курс: Введение в DevOps
+backend      | 2026-03-21 03:02:46.553 | Язык контента: Русский
+backend      | 2026-03-21 03:02:46.553 | Предыдущий урок: Основы Docker (theory)
+backend      | 2026-03-21 03:02:46.553 | Тема раздела: Введение в DevOps
+backend      | 2026-03-21 03:02:46.553 | Следующий урок: Практика Bash (practice)
+ai-framework | 2026-03-21 03:02:46.560 | INFO:     172.19.0.4:40258 - "POST /execute HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:46.560 | 2026-03-20 17:02:46 - httpx - INFO - HTTP Request: POST http://ai-framework:8000/execute "HTTP/1.1 200 OK"
+backend      | 2026-03-21 03:02:46.561 | INFO:     172.19.0.1:44622 - "POST /api/v1/ai/generate/content?content_type=theory HTTP/1.1" 200 OK
+frontend     | 2026-03-21 03:02:48.124 |  GET /lesson/0a714904-5e04-4b32-9180-8f74a6620526/theory 200 in 109ms (compile: 72ms, proxy.ts: 6ms, render: 32ms)
+backend      | 2026-03-21 03:02:48.150 | INFO:     172.19.0.1:44622 - "OPTIONS /api/v1/courses/nodes/0a714904-5e04-4b32-9180-8f74a6620526 HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:48.151 | INFO:     172.19.0.1:43882 - "OPTIONS /api/v1/courses/nodes/0a714904-5e04-4b32-9180-8f74a6620526 HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:48.161 | INFO:     172.19.0.1:43882 - "GET /api/v1/courses/nodes/0a714904-5e04-4b32-9180-8f74a6620526 HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:48.172 | INFO:     172.19.0.1:44622 - "GET /api/v1/courses/nodes/0a714904-5e04-4b32-9180-8f74a6620526 HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:48.175 | INFO:     172.19.0.1:43882 - "GET /api/v1/courses/8be2cd47-189b-4eeb-b2c2-8fcf89832a9d HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:48.184 | INFO:     172.19.0.1:44622 - "GET /api/v1/courses/8be2cd47-189b-4eeb-b2c2-8fcf89832a9d HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:48.185 | 2026-03-20 17:02:48 - app.api.ai_proxy - INFO - Generating theory content for node 0a714904-5e04-4b32-9180-8f74a6620526
+backend      | 2026-03-21 03:02:48.187 | 2026-03-20 17:02:48 - app.api.ai_proxy - INFO - Context for node 0a714904-5e04-4b32-9180-8f74a6620526: language=ru
+backend      | 2026-03-21 03:02:48.187 | 2026-03-20 17:02:48 - app.api.ai_proxy - INFO - Context summary:
+backend      | 2026-03-21 03:02:48.187 | Курс: Введение в DevOps
+backend      | 2026-03-21 03:02:48.187 | Язык контента: Русский
+backend      | 2026-03-21 03:02:48.187 | Предыдущий урок: Создание Jenkinsfile (practice)
+backend      | 2026-03-21 03:02:48.187 | Тема раздела: Введение в DevOps
+backend      | 2026-03-21 03:02:48.187 | Следующий урок: Создание Dockerfile (practice)
+backend      | 2026-03-21 03:02:48.194 | 2026-03-20 17:02:48 - app.api.ai_proxy - INFO - Generating theory content for node 0a714904-5e04-4b32-9180-8f74a6620526
+ai-framework | 2026-03-21 03:02:48.195 | INFO:     172.19.0.4:40270 - "POST /execute HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:48.196 | 2026-03-20 17:02:48 - httpx - INFO - HTTP Request: POST http://ai-framework:8000/execute "HTTP/1.1 200 OK"
+backend      | 2026-03-21 03:02:48.197 | INFO:     172.19.0.1:43882 - "POST /api/v1/ai/generate/content?content_type=theory HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:48.199 | 2026-03-20 17:02:48 - app.api.ai_proxy - INFO - Context for node 0a714904-5e04-4b32-9180-8f74a6620526: language=ru
+backend      | 2026-03-21 03:02:48.199 | 2026-03-20 17:02:48 - app.api.ai_proxy - INFO - Context summary:
+backend      | 2026-03-21 03:02:48.199 | Курс: Введение в DevOps
+backend      | 2026-03-21 03:02:48.199 | Язык контента: Русский
+backend      | 2026-03-21 03:02:48.199 | Предыдущий урок: Создание Jenkinsfile (practice)
+backend      | 2026-03-21 03:02:48.199 | Тема раздела: Введение в DevOps
+backend      | 2026-03-21 03:02:48.199 | Следующий урок: Создание Dockerfile (practice)
+ai-framework | 2026-03-21 03:02:48.208 | INFO:     172.19.0.4:40274 - "POST /execute HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:48.208 | 2026-03-20 17:02:48 - httpx - INFO - HTTP Request: POST http://ai-framework:8000/execute "HTTP/1.1 200 OK"
+backend      | 2026-03-21 03:02:48.209 | INFO:     172.19.0.1:44622 - "POST /api/v1/ai/generate/content?content_type=theory HTTP/1.1" 200 OK
+frontend     | 2026-03-21 03:02:49.838 |  GET /lesson/6392091a-f025-48d6-bc9b-a7d2f2aec46f/theory 200 in 108ms (compile: 72ms, proxy.ts: 5ms, render: 31ms)
+backend      | 2026-03-21 03:02:49.860 | INFO:     172.19.0.1:44622 - "OPTIONS /api/v1/courses/nodes/6392091a-f025-48d6-bc9b-a7d2f2aec46f HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:49.865 | INFO:     172.19.0.1:43882 - "OPTIONS /api/v1/courses/nodes/6392091a-f025-48d6-bc9b-a7d2f2aec46f HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:49.871 | INFO:     172.19.0.1:44622 - "GET /api/v1/courses/nodes/6392091a-f025-48d6-bc9b-a7d2f2aec46f HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:49.882 | INFO:     172.19.0.1:43882 - "GET /api/v1/courses/nodes/6392091a-f025-48d6-bc9b-a7d2f2aec46f HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:49.887 | INFO:     172.19.0.1:44622 - "GET /api/v1/courses/8be2cd47-189b-4eeb-b2c2-8fcf89832a9d HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:49.896 | INFO:     172.19.0.1:43882 - "GET /api/v1/courses/8be2cd47-189b-4eeb-b2c2-8fcf89832a9d HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:49.897 | 2026-03-20 17:02:49 - app.api.ai_proxy - INFO - Generating theory content for node 6392091a-f025-48d6-bc9b-a7d2f2aec46f
+backend      | 2026-03-21 03:02:49.899 | 2026-03-20 17:02:49 - app.api.ai_proxy - INFO - Context for node 6392091a-f025-48d6-bc9b-a7d2f2aec46f: language=ru
+backend      | 2026-03-21 03:02:49.899 | 2026-03-20 17:02:49 - app.api.ai_proxy - INFO - Context summary:
+backend      | 2026-03-21 03:02:49.899 | Курс: Введение в DevOps
+backend      | 2026-03-21 03:02:49.899 | Язык контента: Русский
+backend      | 2026-03-21 03:02:49.899 | Предыдущий урок: Мульicloud стратегии (theory)
+backend      | 2026-03-21 03:02:49.899 | Тема раздела: Система контроля версий Git
+backend      | 2026-03-21 03:02:49.899 | Следующий урок: Интеграция Terraform и Ansible (theory)
+backend      | 2026-03-21 03:02:49.906 | 2026-03-20 17:02:49 - app.api.ai_proxy - INFO - Generating theory content for node 6392091a-f025-48d6-bc9b-a7d2f2aec46f
+ai-framework | 2026-03-21 03:02:49.908 | INFO:     172.19.0.4:40286 - "POST /execute HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:49.908 | 2026-03-20 17:02:49 - httpx - INFO - HTTP Request: POST http://ai-framework:8000/execute "HTTP/1.1 200 OK"
+backend      | 2026-03-21 03:02:49.910 | 2026-03-20 17:02:49 - app.api.ai_proxy - INFO - Context for node 6392091a-f025-48d6-bc9b-a7d2f2aec46f: language=ru
+backend      | 2026-03-21 03:02:49.910 | 2026-03-20 17:02:49 - app.api.ai_proxy - INFO - Context summary:
+backend      | 2026-03-21 03:02:49.910 | Курс: Введение в DevOps
+backend      | 2026-03-21 03:02:49.910 | Язык контента: Русский
+backend      | 2026-03-21 03:02:49.910 | Предыдущий урок: Мульicloud стратегии (theory)
+backend      | 2026-03-21 03:02:49.910 | Тема раздела: Система контроля версий Git
+backend      | 2026-03-21 03:02:49.910 | Следующий урок: Интеграция Terraform и Ansible (theory)
+backend      | 2026-03-21 03:02:49.915 | INFO:     172.19.0.1:44622 - "POST /api/v1/ai/generate/content?content_type=theory HTTP/1.1" 200 OK
+ai-framework | 2026-03-21 03:02:49.917 | INFO:     172.19.0.4:40294 - "POST /execute HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:49.917 | 2026-03-20 17:02:49 - httpx - INFO - HTTP Request: POST http://ai-framework:8000/execute "HTTP/1.1 200 OK"
+backend      | 2026-03-21 03:02:49.918 | INFO:     172.19.0.1:43882 - "POST /api/v1/ai/generate/content?content_type=theory HTTP/1.1" 200 OK
+frontend     | 2026-03-21 03:02:51.419 |  GET /course/8be2cd47-189b-4eeb-b2c2-8fcf89832a9d 200 in 103ms (compile: 67ms, proxy.ts: 5ms, render: 32ms)
+backend      | 2026-03-21 03:02:51.454 | INFO:     172.19.0.1:43882 - "GET /api/v1/courses/8be2cd47-189b-4eeb-b2c2-8fcf89832a9d HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:51.465 | INFO:     172.19.0.1:44622 - "GET /api/v1/courses/8be2cd47-189b-4eeb-b2c2-8fcf89832a9d HTTP/1.1" 200 OK
+frontend     | 2026-03-21 03:02:55.522 |  GET /lesson/b0536c8d-6e8e-4472-a25d-320b6a0dbda1/theory 200 in 111ms (compile: 74ms, proxy.ts: 5ms, render: 31ms)
+backend      | 2026-03-21 03:02:55.548 | INFO:     172.19.0.1:44622 - "GET /api/v1/courses/nodes/b0536c8d-6e8e-4472-a25d-320b6a0dbda1 HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:55.556 | INFO:     172.19.0.1:43882 - "GET /api/v1/courses/nodes/b0536c8d-6e8e-4472-a25d-320b6a0dbda1 HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:55.564 | INFO:     172.19.0.1:44622 - "GET /api/v1/courses/8be2cd47-189b-4eeb-b2c2-8fcf89832a9d HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:55.573 | INFO:     172.19.0.1:43882 - "GET /api/v1/courses/8be2cd47-189b-4eeb-b2c2-8fcf89832a9d HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:55.574 | 2026-03-20 17:02:55 - app.api.ai_proxy - INFO - Generating theory content for node b0536c8d-6e8e-4472-a25d-320b6a0dbda1
+backend      | 2026-03-21 03:02:55.576 | 2026-03-20 17:02:55 - app.api.ai_proxy - INFO - Context for node b0536c8d-6e8e-4472-a25d-320b6a0dbda1: language=ru
+backend      | 2026-03-21 03:02:55.576 | 2026-03-20 17:02:55 - app.api.ai_proxy - INFO - Context summary:
+backend      | 2026-03-21 03:02:55.576 | Курс: Введение в DevOps
+backend      | 2026-03-21 03:02:55.576 | Язык контента: Русский
+backend      | 2026-03-21 03:02:55.576 | Предыдущий урок: Работа с удалёнными репозиториями (theory)
+backend      | 2026-03-21 03:02:55.576 | Тема раздела: Введение в DevOps
+backend      | 2026-03-21 03:02:55.576 | Следующий урок: Реализация проекта (practice)
+backend      | 2026-03-21 03:02:55.583 | 2026-03-20 17:02:55 - app.api.ai_proxy - INFO - Generating theory content for node b0536c8d-6e8e-4472-a25d-320b6a0dbda1
+ai-framework | 2026-03-21 03:02:55.585 | INFO:     172.19.0.4:40346 - "POST /execute HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:55.585 | 2026-03-20 17:02:55 - httpx - INFO - HTTP Request: POST http://ai-framework:8000/execute "HTTP/1.1 200 OK"
+backend      | 2026-03-21 03:02:55.586 | 2026-03-20 17:02:55 - app.api.ai_proxy - INFO - Context for node b0536c8d-6e8e-4472-a25d-320b6a0dbda1: language=ru
+backend      | 2026-03-21 03:02:55.586 | 2026-03-20 17:02:55 - app.api.ai_proxy - INFO - Context summary:
+backend      | 2026-03-21 03:02:55.586 | Курс: Введение в DevOps
+backend      | 2026-03-21 03:02:55.586 | Язык контента: Русский
+backend      | 2026-03-21 03:02:55.586 | Предыдущий урок: Работа с удалёнными репозиториями (theory)
+backend      | 2026-03-21 03:02:55.586 | Тема раздела: Введение в DevOps
+backend      | 2026-03-21 03:02:55.586 | Следующий урок: Реализация проекта (practice)
+backend      | 2026-03-21 03:02:55.592 | INFO:     172.19.0.1:44622 - "POST /api/v1/ai/generate/content?content_type=theory HTTP/1.1" 200 OK
+ai-framework | 2026-03-21 03:02:55.594 | INFO:     172.19.0.4:40358 - "POST /execute HTTP/1.1" 200 OK
+backend      | 2026-03-21 03:02:55.594 | 2026-03-20 17:02:55 - httpx - INFO - HTTP Request: POST http://ai-framework:8000/execute "HTTP/1.1 200 OK"
+backend      | 2026-03-21 03:02:55.595 | INFO:     172.19.0.1:43882 - "POST /api/v1/ai/generate/content?content_type=theory HTTP/1.1" 200 OK

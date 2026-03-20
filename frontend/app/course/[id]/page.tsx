@@ -49,22 +49,27 @@ export default function CoursePage() {
         };
         
         if (data.structure && data.structure.length > 0) {
-          // Flatten structure and save nodes - include generated UUIDs
+          // Flatten structure and save nodes - preserve order_index from AI
           const flattenStructure = (
-            structure: Array<{ id: string; title: string; type: string; children?: Array<{ id: string; title: string; type: string; content: unknown }> }>,
+            structure: Array<{ id: string; title: string; type: string; order_index?: number; children?: Array<{ id: string; title: string; type: string; order_index?: number; content: unknown }> }>,
             parentId: string | null = null,
-            nodes: Array<{ id: string; title: string; type: "topic" | "theory" | "practice"; parent_id: string | null }> = []
-          ): Array<{ id: string; title: string; type: "topic" | "theory" | "practice"; parent_id: string | null }> => {
-            structure.forEach((item) => {
+            nodes: Array<{ id: string; title: string; type: "topic" | "theory" | "practice"; parent_id: string | null; order_index: number }> = [],
+            siblingIndex: number = 0
+          ): Array<{ id: string; title: string; type: "topic" | "theory" | "practice"; parent_id: string | null; order_index: number }> => {
+            structure.forEach((item, idx) => {
               const newId = crypto.randomUUID();
+              // Preserve order from AI structure, fallback to sibling index
+              const orderIndex = item.order_index ?? idx;
+              
               nodes.push({
                 id: newId,
                 title: item.title,
                 type: item.type as "topic" | "theory" | "practice",
                 parent_id: parentId,
+                order_index: orderIndex,
               });
               if (item.children && item.children.length > 0) {
-                flattenStructure(item.children, newId, nodes);
+                flattenStructure(item.children, newId, nodes, 0);
               }
             });
             return nodes;

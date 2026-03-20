@@ -1,13 +1,13 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState, useRef, useCallback } from "react"
 import Link from "next/link"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import Editor, { OnMount } from "@monaco-editor/react"
-import { ArrowLeft, Code, Play, ChevronRight, CheckCircle, XCircle, Loader2, Sparkles } from "lucide-react"
+import { ArrowLeft, Code, Play, ChevronRight, ChevronLeft, CheckCircle, XCircle, Loader2, RefreshCw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { SmartConsole } from "@/components/smart-console"
-import { aiApi, nodesApi } from "@/lib/api"
+import { aiApi, nodesApi, coursesApi, CourseNode } from "@/lib/api"
 
 interface PracticeData {
   id: string
@@ -20,23 +20,98 @@ interface PracticeData {
   content_status: string
 }
 
+interface NavigationInfo {
+  prevNode: CourseNode | null
+  nextNode: CourseNode | null
+  currentIndex: number
+  totalLessons: number
+}
+
 export default function PracticePage() {
   const params = useParams()
+  const router = useRouter()
   const lessonId = params.id as string
   const [practice, setPractice] = useState<PracticeData | null>(null)
+  const [navigation, setNavigation] = useState<NavigationInfo>({ prevNode: null, nextNode: null, currentIndex: 0, totalLessons: 0 })
   const [code, setCode] = useState("")
   const [loading, setLoading] = useState(true)
   const [running, setRunning] = useState(false)
   const [result, setResult] = useState<{ success: boolean; message: string; output?: string } | null>(null)
   const [showTask, setShowTask] = useState(true)
   const [generating, setGenerating] = useState(false)
+  const [regenerating, setRegenerating] = useState(false)
   const editorRef = useRef<any>(null)
+
+  // Calculate navigation between lessons
+  const calculateNavigation = useCallback((courseData: { nodes: CourseNode[] }, currentId: string) => {
+    const lessonNodes = courseData.nodes.filter(n => n.type === "theory" || n.type === "practice")
+    const currentIndex = lessonNodes.findIndex(n => n.id === currentId)
+    
+    setNavigation({
+      prevNode: currentIndex > 0 ? lessonNodes[currentIndex - 1] : null,
+      nextNode: currentIndex < lessonNodes.length - 1 ? lessonNodes[currentIndex + 1] : null,
+      currentIndex: currentIndex + 1,
+      totalLessons: lessonNodes.length,
+    })
+  }, [])
+
+  // Navigate to previous lesson
+  const goToPrev = () => {
+    if (navigation.prevNode) {
+      const type = navigation.prevNode.type === "theory" ? "/theory" : "/practice"
+      router.push(`/lesson/${navigation.prevNode.id}${type}`)
+    }
+  }
+
+  // Navigate to next lesson
+  const goToNext = () => {
+    if (navigation.nextNode) {
+      const type = navigation.nextNode.type === "theory" ? "/theory" : "/practice"
+      router.push(`/lesson/${navigation.nextNode.id}${type}`)
+    }
+  }
+
+  // Regenerate practice content
+  const handleRegenerate = async () => {
+    setRegenerating(true)
+    try {
+      const response = await aiApi.generateContent(
+        { node_id: lessonId, course_id: practice?.course_id || "", title: practice?.title || "", parent_context: practice?.parent_context || "" },
+        "practice"
+      )
+      if (response.success) {
+        const data = response.data as { task: string; solution: string; tests: Array<{ input: string; expected_output: string }> }
+        setPractice(prev => prev ? {
+          ...prev,
+          task: data.task || "# No task available",
+          solution: data.solution || "",
+          tests: data.tests || [],
+          content_status: "generated",
+        } : null)
+        setCode(data.solution || "")
+      }
+    } catch (error) {
+      console.error("Error regenerating practice:", error)
+    } finally {
+      setRegenerating(false)
+    }
+  }
 
   useEffect(() => {
     async function fetchPractice() {
       try {
         // Fetch node from API
         const node = await nodesApi.getById(lessonId)
+        
+        // Fetch course to get all nodes for navigation
+        if (node.course_id) {
+          try {
+            const courseData = await coursesApi.getById(node.course_id)
+            calculateNavigation(courseData, lessonId)
+          } catch (courseError) {
+            console.warn("Could not fetch course for navigation:", courseError)
+          }
+        }
         
         // If content is pending, generate it
         if (node.content_status === "pending" || !node.data?.task) {
@@ -74,7 +149,6 @@ export default function PracticePage() {
             }
           } catch (genError) {
             console.error("Error generating practice:", genError)
-            // Still show the node, even if generation failed
             setPractice({
               id: node.id,
               title: node.title,
@@ -89,7 +163,6 @@ export default function PracticePage() {
           }
           setGenerating(false)
         } else {
-          // Parse content from node.data
           const taskData = node.data?.task as string || ""
           const solutionData = node.data?.solution as string || ""
           const testsData = (node.data?.tests as Array<{ input: string; expected_output: string }>) || []
@@ -108,7 +181,6 @@ export default function PracticePage() {
         }
       } catch (error) {
         console.error("Error fetching practice:", error)
-        // Fallback
         setPractice({
           id: lessonId,
           title: "Practice",
@@ -124,7 +196,7 @@ export default function PracticePage() {
       }
     }
     fetchPractice()
-  }, [lessonId])
+  }, [lessonId, calculateNavigation])
 
   const handleEditorMount: OnMount = (editor) => {
     editorRef.current = editor
@@ -190,11 +262,14 @@ export default function PracticePage() {
               <Code className="w-5 h-5 text-emerald-400" />
               <div>
                 <h1 className="text-lg font-semibold">{practice.title}</h1>
-                <p className="text-sm text-slate-400">Practice</p>
+                <p className="text-sm text-slate-400">Practice • {navigation.currentIndex}/{navigation.totalLessons}</p>
               </div>
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <Button variant="ghost" size="sm" onClick={goToPrev} disabled={!navigation.prevNode} className="text-slate-400">
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
             <Button
               onClick={handleRunCode}
               disabled={running || !code.trim()}
@@ -206,6 +281,12 @@ export default function PracticePage() {
                 <Play className="w-4 h-4 mr-2" />
               )}
               Run Code
+            </Button>
+            <Button variant="ghost" size="sm" onClick={goToNext} disabled={!navigation.nextNode} className="text-slate-400">
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+            <Button variant="ghost" size="sm" onClick={handleRegenerate} disabled={regenerating} className="text-slate-400">
+              <RefreshCw className={`w-4 h-4 ${regenerating ? "animate-spin" : ""}`} />
             </Button>
             <Link href={`/lesson/${lessonId}/theory`}>
               <Button variant="secondary" size="sm">

@@ -19,6 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.db.database import get_db
+from app.db.schema import Course, Node
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -27,6 +28,136 @@ AI_API_URL = os.getenv("AI_API_URL", "http://localhost:8000")
 AI_MOCK_ENABLED = os.getenv("AI_MOCK_ENABLED", "true").lower() == "true"
 
 logger.info(f"AI Proxy initialized: mock_enabled={AI_MOCK_ENABLED}, api_url={AI_API_URL}")
+
+
+# =============================================================================
+# CONTEXT ENGINE - Collects full course context for content generation
+# =============================================================================
+
+async def get_course_context(db: AsyncSession, course_id: str, node_id: str) -> dict:
+    """
+    Collects comprehensive context for lesson generation:
+    - Course metadata (title, language)
+    - Node position in course tree
+    - Previous/next lessons
+    - Parent topic info
+    - Sibling nodes
+    """
+    try:
+        course_uuid = uuid.UUID(course_id)
+        node_uuid = uuid.UUID(node_id)
+    except ValueError:
+        return {}
+    
+    # Get course
+    course_result = await db.execute(select(Course).where(Course.id == course_uuid))
+    course = course_result.scalar_one_or_none()
+    if not course:
+        return {}
+    
+    # Get course language from settings
+    course_settings = course.settings or {}
+    language = course_settings.get("language", "ru")
+    
+    # Get all nodes for this course ordered by order_index
+    nodes_result = await db.execute(
+        select(Node)
+        .where(Node.course_id == course_uuid)
+        .order_by(Node.order_index)
+    )
+    all_nodes = nodes_result.scalars().all()
+    
+    # Build node lookup and find current node
+    nodes_list = [
+        {
+            "id": str(n.id),
+            "title": n.title,
+            "type": n.type,
+            "parent_id": str(n.parent_id) if n.parent_id else None,
+            "order_index": n.order_index,
+        }
+        for n in all_nodes
+    ]
+    
+    current_node = None
+    current_idx = -1
+    for idx, n in enumerate(nodes_list):
+        if n["id"] == node_id:
+            current_node = n
+            current_idx = idx
+            break
+    
+    if not current_node:
+        return {
+            "course_title": course.title,
+            "language": language,
+            "nodes": nodes_list,
+        }
+    
+    # Find previous and next lessons (theory/practice nodes)
+    prev_lesson = nodes_list[current_idx - 1] if current_idx > 0 else None
+    next_lesson = nodes_list[current_idx + 1] if current_idx < len(nodes_list) - 1 else None
+    
+    # Find parent topic
+    parent_topic = None
+    if current_node.get("parent_id"):
+        for n in nodes_list:
+            if n["id"] == current_node["parent_id"] and n["type"] == "topic":
+                parent_topic = n
+                break
+    
+    # Find siblings (same parent)
+    siblings = [
+        n for n in nodes_list
+        if n["parent_id"] == current_node.get("parent_id") and n["id"] != node_id
+    ]
+    
+    return {
+        "course_title": course.title,
+        "course_description": course.description or "",
+        "language": language,
+        "current_node": current_node,
+        "prev_lesson": prev_lesson,
+        "next_lesson": next_lesson,
+        "parent_topic": parent_topic,
+        "siblings": siblings,
+        "nodes": nodes_list,
+    }
+
+
+def build_context_summary(context: dict) -> str:
+    """
+    Builds a human-readable context summary for AI prompts.
+    Summarizes the educational context for this lesson.
+    """
+    if not context:
+        return ""
+    
+    parts = []
+    
+    # Course info
+    parts.append(f"Курс: {context.get('course_title', 'Unknown')}")
+    
+    # Language note
+    language = context.get("language", "ru")
+    parts.append(f"Язык контента: {'Русский' if language == 'ru' else 'Английский'}")
+    
+    # Previous lesson
+    prev = context.get("prev_lesson")
+    if prev:
+        parts.append(f"Предыдущий урок: {prev['title']} ({prev['type']})")
+    
+    # Parent topic
+    parent = context.get("parent_topic")
+    if parent:
+        parts.append(f"Тема раздела: {parent['title']}")
+    
+    # Next lesson
+    next_lesson = context.get("next_lesson")
+    if next_lesson:
+        parts.append(f"Следующий урок: {next_lesson['title']} ({next_lesson['type']})")
+    
+    return "\n".join(parts)
 
 
 class CourseOutlineRequest(BaseModel):
@@ -156,10 +287,22 @@ async def generate_lesson_content(
 ):
     """
     Generate lesson content and save to database.
+    Uses Context Engine to provide full course context for coherent content generation.
     JSON parsing handled by AI Framework (json_mode).
     This proxy normalizes response format for frontend.
     """
     logger.info(f"Generating {content_type} content for node {request.node_id}")
+
+    # =================================================================
+    # STEP 1: Get course context (NEW - for coherent content)
+    # =================================================================
+    context = await get_course_context(db, request.course_id, request.node_id)
+    context_summary = build_context_summary(context)
+    language = context.get("language", "ru") if context else "ru"
+    
+    logger.info(f"Context for node {request.node_id}: language={language}")
+    if context_summary:
+        logger.info(f"Context summary:\n{context_summary}")
 
     # Use mock data or call AI Framework
     if AI_MOCK_ENABLED:
@@ -167,12 +310,27 @@ async def generate_lesson_content(
         logger.info(f"Using mock content for {content_type}")
     else:
         pipeline = "lesson_theory" if content_type == "theory" else "lesson_practice"
+        
+        # =================================================================
+        # STEP 2: Build enhanced request with context (NEW)
+        # =================================================================
+        enhanced_input = {
+            **request.model_dump(),
+            "language": language,  # Explicit language from course settings
+            "context_summary": context_summary,  # Human-readable context
+            "context": context,  # Full context object for AI
+            "course_title": context.get("course_title") if context else None,
+            "prev_lesson_title": context.get("prev_lesson", {}).get("title") if context else None,
+            "next_lesson_title": context.get("next_lesson", {}).get("title") if context else None,
+            "parent_topic_title": context.get("parent_topic", {}).get("title") if context else None,
+        }
+        
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.post(
                     f"{AI_API_URL}/execute",
-                    json={"pipeline_name": pipeline, "input_data": request.model_dump()},
-                    timeout=60.0,
+                    json={"pipeline_name": pipeline, "input_data": enhanced_input},
+                    timeout=120.0,  # Increased timeout for better content
                 )
                 response.raise_for_status()
                 ai_result = response.json()
@@ -181,9 +339,16 @@ async def generate_lesson_content(
             raise HTTPException(status_code=500, detail=f"AI service error: {str(e)}")
 
         if not ai_result.get("success", False):
+            logger.error(f"AI returned failure: {ai_result}")
             return ai_result
 
         ai_data: dict[str, Any] = ai_result.get("data", {}) or {}
+        
+        # DEBUG: Log full AI response
+        logger.info(f"=== DEBUG: AI Framework full response ===")
+        logger.info(f"ai_result keys: {list(ai_result.keys())}")
+        logger.info(f"ai_data keys: {list(ai_data.keys())}")
+        logger.info(f"ai_data content preview: {str(ai_data)[:500]}...")
 
         if content_type == "theory":
             # lesson_theory returns markdown in lesson_content
@@ -222,6 +387,37 @@ async def generate_lesson_content(
     # Save to database
     await _save_content_to_db(db, request.node_id, content_type, normalized)
     
+    # =================================================================
+    # STEP 3: Re-read from DB to guarantee fresh data (FIX for empty content issue)
+    # =================================================================
+    try:
+        node_result = await db.execute(select(Node).where(Node.id == uuid.UUID(request.node_id)))
+        node = node_result.scalar_one_or_none()
+        
+        if node and node.content_status == "generated":
+            if content_type == "theory":
+                return {
+                    "success": True,
+                    "data": {
+                        "content": node.content or "",
+                        "content_status": node.content_status,
+                    }
+                }
+            else:
+                node_data = node.data or {}
+                return {
+                    "success": True,
+                    "data": {
+                        "task": node_data.get("task", ""),
+                        "solution": node_data.get("solution", ""),
+                        "tests": node_data.get("tests", []),
+                        "content_status": node.content_status,
+                    }
+                }
+    except Exception as e:
+        logger.warning(f"Could not re-read node from DB: {e}")
+    
+    # Fallback to normalized response
     return normalized
 
 

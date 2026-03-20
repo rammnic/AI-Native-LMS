@@ -54,7 +54,7 @@ class Course(Base):
     title = Column(String(500), nullable=False)
     description = Column(Text, nullable=True)
     status = Column(String(50), default="draft", nullable=False)
-    settings = Column(JSONB, default={})
+    settings = Column(JSONB, default={"language": "ru"})  # Default: Russian language
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 

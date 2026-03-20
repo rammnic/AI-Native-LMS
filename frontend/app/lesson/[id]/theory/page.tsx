@@ -1,13 +1,13 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import Link from "next/link"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import ReactMarkdown from "react-markdown"
-import { ArrowLeft, BookOpen, RefreshCw, Sparkles, ChevronRight, Loader2 } from "lucide-react"
+import { ArrowLeft, BookOpen, RefreshCw, ChevronRight, Loader2, ChevronLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { SmartConsole } from "@/components/smart-console"
-import { aiApi, nodesApi, CourseNode } from "@/lib/api"
+import { aiApi, nodesApi, coursesApi, CourseNode } from "@/lib/api"
 
 interface LessonData {
   id: string
@@ -18,19 +18,75 @@ interface LessonData {
   content_status: string
 }
 
+interface CourseData {
+  id: string
+  title: string
+  nodes: CourseNode[]
+}
+
+interface NavigationInfo {
+  prevNode: CourseNode | null
+  nextNode: CourseNode | null
+  currentIndex: number
+  totalLessons: number
+}
+
 export default function TheoryPage() {
   const params = useParams()
+  const router = useRouter()
   const lessonId = params.id as string
   const [lesson, setLesson] = useState<LessonData | null>(null)
+  const [course, setCourse] = useState<CourseData | null>(null)
+  const [navigation, setNavigation] = useState<NavigationInfo>({ prevNode: null, nextNode: null, currentIndex: 0, totalLessons: 0 })
   const [loading, setLoading] = useState(true)
   const [regenerating, setRegenerating] = useState(false)
   const [generating, setGenerating] = useState(false)
+
+  // Calculate navigation between lessons
+  const calculateNavigation = useCallback((courseData: CourseData, currentId: string) => {
+    const lessonNodes = courseData.nodes.filter(n => n.type === "theory" || n.type === "practice")
+    const currentIndex = lessonNodes.findIndex(n => n.id === currentId)
+    
+    setNavigation({
+      prevNode: currentIndex > 0 ? lessonNodes[currentIndex - 1] : null,
+      nextNode: currentIndex < lessonNodes.length - 1 ? lessonNodes[currentIndex + 1] : null,
+      currentIndex: currentIndex + 1,
+      totalLessons: lessonNodes.length,
+    })
+  }, [])
+
+  // Navigate to previous lesson
+  const goToPrev = () => {
+    if (navigation.prevNode) {
+      const type = navigation.prevNode.type === "theory" ? "/theory" : "/practice"
+      router.push(`/lesson/${navigation.prevNode.id}${type}`)
+    }
+  }
+
+  // Navigate to next lesson
+  const goToNext = () => {
+    if (navigation.nextNode) {
+      const type = navigation.nextNode.type === "theory" ? "/theory" : "/practice"
+      router.push(`/lesson/${navigation.nextNode.id}${type}`)
+    }
+  }
 
   useEffect(() => {
     async function fetchLesson() {
       try {
         // Fetch node from API
         const node = await nodesApi.getById(lessonId)
+        
+        // Fetch course to get all nodes for navigation
+        if (node.course_id) {
+          try {
+            const courseData = await coursesApi.getById(node.course_id)
+            setCourse(courseData)
+            calculateNavigation(courseData, lessonId)
+          } catch (courseError) {
+            console.warn("Could not fetch course for navigation:", courseError)
+          }
+        }
         
         // If content is pending, generate it
         if (node.content_status === "pending" || !node.content) {
@@ -99,7 +155,7 @@ export default function TheoryPage() {
       }
     }
     fetchLesson()
-  }, [lessonId])
+  }, [lessonId, calculateNavigation])
 
   const handleRegenerate = async () => {
     setRegenerating(true)
@@ -147,7 +203,7 @@ export default function TheoryPage() {
               <BookOpen className="w-5 h-5 text-cyan-400" />
               <div>
                 <h1 className="text-lg font-semibold">{lesson.title}</h1>
-                <p className="text-sm text-slate-400">Theory</p>
+                <p className="text-sm text-slate-400">Theory • {navigation.currentIndex}/{navigation.totalLessons}</p>
               </div>
             </div>
           </div>
@@ -166,8 +222,37 @@ export default function TheoryPage() {
         </div>
       </header>
 
+      {/* Navigation between lessons */}
+      <div className="container mx-auto px-6 py-4 max-w-3xl">
+        <div className="flex items-center justify-between">
+          <Button 
+            variant="ghost" 
+            onClick={goToPrev}
+            disabled={!navigation.prevNode}
+            className="text-slate-400 hover:text-white"
+          >
+            <ChevronLeft className="w-4 h-4 mr-1" />
+            {navigation.prevNode?.title || "Previous"}
+          </Button>
+          
+          <span className="text-sm text-slate-500">
+            {navigation.currentIndex} / {navigation.totalLessons}
+          </span>
+          
+          <Button 
+            variant="ghost" 
+            onClick={goToNext}
+            disabled={!navigation.nextNode}
+            className="text-slate-400 hover:text-white"
+          >
+            {navigation.nextNode?.title || "Next"}
+            <ChevronRight className="w-4 h-4 ml-1" />
+          </Button>
+        </div>
+      </div>
+
       {/* Content */}
-      <main className="container mx-auto px-6 py-8 max-w-3xl">
+      <main className="container mx-auto px-6 py-4 max-w-3xl">
         <article className="prose prose-invert prose-slate max-w-none">
           <ReactMarkdown
             components={{

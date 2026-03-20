@@ -432,6 +432,9 @@ DEBUG=next* npm run dev
 - [x] Аутентификация: добавлена страница /login, AuthProvider, middleware
 - [x] AI Pipeline: исправлена проблема с пустым курсом при создании (добавлены JsonParseNode, JsonTransformNode, ExtractCourseMetadataNode)
 - [x] Генерация контента: исправлено сохранение в БД (ai_proxy.py теперь сохраняет content/data после генерации)
+- [x] **Исправлена ошибка шаблонизатора в lesson_theory.json**: Jinja2 не поддерживает синтаксис Handlebars (`{{#if}}`), исправлено на `{% if %}` / `{% endif %}`
+- [x] **Исправлен возврат контента**: после генерации AI Framework данные теперь корректно сохраняются в БД и возвращаются на фронтенд
+- [x] **Добавлено детальное логирование**: ai_proxy.py теперь логирует полный ответ AI Framework для отладки
 - [x] Контракт AI proxy ↔ pipelines: нормализованы keys для real AI (lesson_theory/lesson_practice/ai_mentor)
 - [x] Nodes API: добавлен PATCH endpoint для обновления ноды
 - [x] **JSON Parsing**: переведён на Structured Output (response_format: json_object) — устранены проблемы с парсингом

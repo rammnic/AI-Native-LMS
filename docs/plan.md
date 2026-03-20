@@ -199,6 +199,11 @@
   - [x] theory: извлечение `lesson_content` и возврат `data.content`
   - [x] practice: парсинг `practice_task` (JsonParseNode) и нормализация в `data.task/solution/tests`
   - [x] chat: извлечение `mentor_response` и возврат `data.answer`
+- [x] **9.4** Исправлена ошибка шаблонизатора в lesson_theory.json
+  - [x] Jinja2 не поддерживает синтаксис Handlebars (`{{#if}}`) — ошибка "unexpected char '#'"
+  - [x] Исправлено: `{{#if}}` → `{% if %}`, `{{/if}}` → `{% endif %}`
+  - [x] Добавлено детальное логирование ответа AI Framework в ai_proxy.py
+  - [x] После генерации данные перечитываются из БД для гарантированного возврата
 
 ---
 
