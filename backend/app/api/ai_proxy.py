@@ -114,19 +114,38 @@ async def generate_course_structure(request: CourseOutlineRequest):
         return MOCK_COURSE_OUTLINE
     
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            logger.info(f"Calling AI Framework at {AI_API_URL}/execute")
             response = await client.post(
                 f"{AI_API_URL}/execute",
                 json={"pipeline_name": "course_outline", "input_data": request.model_dump()},
-                timeout=60.0,
             )
+            logger.info(f"AI Framework response status: {response.status_code}")
             response.raise_for_status()
             result = response.json()
+            logger.info(f"AI response success: {result.get('success')}")
             logger.info(f"AI response keys: {list(result.get('data', {}).keys())}")
+            
+            # Check if AI returned an error
+            if not result.get("success", False):
+                error_msg = result.get("data", {}).get("error", "Unknown AI error")
+                logger.error(f"AI returned error: {error_msg}")
+                raise HTTPException(status_code=500, detail=f"AI error: {error_msg}")
+            
             return result
+    except httpx.TimeoutException:
+        logger.error("AI service timeout")
+        raise HTTPException(status_code=500, detail="AI service timeout")
+    except httpx.HTTPStatusError as e:
+        logger.error(f"AI HTTP error: {e.response.status_code} - {e.response.text}")
+        raise HTTPException(status_code=500, detail=f"AI HTTP error: {e.response.status_code}")
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"AI service error: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"AI service error: {str(e)}")
+        logger.error(f"AI service error: {type(e).__name__}: {str(e)}")
+        import traceback
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail=f"AI service error: {type(e).__name__}: {str(e) or 'No error message'}")
 
 
 @router.post("/generate/content")
