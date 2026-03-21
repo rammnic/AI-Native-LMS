@@ -42,9 +42,13 @@ export default function PracticePage() {
   const [regenerating, setRegenerating] = useState(false)
   const editorRef = useRef<any>(null)
 
-  // Calculate navigation between lessons
+  // Calculate navigation between lessons - using f_order for simple and correct numbering
   const calculateNavigation = useCallback((courseData: { nodes: CourseNode[] }, currentId: string) => {
-    const lessonNodes = courseData.nodes.filter(n => n.type === "theory" || n.type === "practice")
+    // Filter only lessons (theory/practice) and sort by f_order
+    const lessonNodes = courseData.nodes
+      .filter(n => n.type === "theory" || n.type === "practice")
+      .sort((a, b) => a.f_order - b.f_order)
+    
     const currentIndex = lessonNodes.findIndex(n => n.id === currentId)
     
     setNavigation({

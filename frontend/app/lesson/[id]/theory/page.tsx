@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react"
 import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
 import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
 import { ArrowLeft, BookOpen, RefreshCw, ChevronRight, Loader2, ChevronLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { SmartConsole } from "@/components/smart-console"
@@ -42,9 +43,13 @@ export default function TheoryPage() {
   const [regenerating, setRegenerating] = useState(false)
   const [generating, setGenerating] = useState(false)
 
-  // Calculate navigation between lessons
+  // Calculate navigation between lessons - using f_order for simple and correct numbering
   const calculateNavigation = useCallback((courseData: CourseData, currentId: string) => {
-    const lessonNodes = courseData.nodes.filter(n => n.type === "theory" || n.type === "practice")
+    // Filter only lessons (theory/practice) and sort by f_order
+    const lessonNodes = courseData.nodes
+      .filter(n => n.type === "theory" || n.type === "practice")
+      .sort((a, b) => a.f_order - b.f_order)
+    
     const currentIndex = lessonNodes.findIndex(n => n.id === currentId)
     
     setNavigation({
@@ -255,6 +260,7 @@ export default function TheoryPage() {
       <main className="container mx-auto px-6 py-4 max-w-3xl">
         <article className="prose prose-invert prose-slate max-w-none">
           <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
             components={{
               h1: ({ children }) => <h1 className="text-3xl font-bold mb-6 text-white">{children}</h1>,
               h2: ({ children }) => <h2 className="text-2xl font-semibold mt-8 mb-4 text-white">{children}</h2>,

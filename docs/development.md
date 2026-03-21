@@ -223,7 +223,8 @@ AI-Native-LMS/
 | parent_id | UUID | Self-reference для дерева |
 | title | VARCHAR(500) | Название |
 | type | VARCHAR(50) | topic/theory/practice |
-| order_index | INTEGER | Порядок |
+| order_index | INTEGER | Порядок внутри темы |
+| f_order | INTEGER | Плоский порядок урока (1, 2, 3...) в рамках курса. Topics имеют 0 |
 | content_status | VARCHAR(50) | pending/generated |
 | content | TEXT | Markdown контент |
 | data | JSONB | Доп. данные |
@@ -438,6 +439,10 @@ DEBUG=next* npm run dev
 - [x] Контракт AI proxy ↔ pipelines: нормализованы keys для real AI (lesson_theory/lesson_practice/ai_mentor)
 - [x] Nodes API: добавлен PATCH endpoint для обновления ноды
 - [x] **JSON Parsing**: переведён на Structured Output (response_format: json_object) — устранены проблемы с парсингом
+- [x] **Courses API 500 error**: исправлена функция `sort_nodes_by_order` в courses.py — `asyncpg.UUID` объекты из PostgreSQL теперь корректно конвертируются в строку перед сортировкой
+- [x] **Frontend build error**: добавлена зависимость `remark-gfm` в frontend/package.json для поддержки GitHub Flavored Markdown
+- [x] **Нестабильная сортировка уроков**: исправлена функция `sort_nodes_by_order` в courses.py и `calculateNavigation` в theory/practice pages — добавлена вторичная сортировка по `id` для стабильного порядка уроков (подробнее: `docs/lesson-navigation-fix.md`)
+- [x] **f_order для корректной нумерации уроков**: добавлено поле `f_order` в таблицу nodes — плоский порядковый номер урока (1, 2, 3...) в рамках курса. Topics имеют f_order=0. Автоматический пересчёт при создании/изменении узлов. API: POST `/api/v1/courses/nodes/recalculate-f-order`
 - [ ] Стриминг: нужно доработать UI для плавного отображения
 - [ ] Консоль: режим Chat vs Debug нужно разделить UI
 - [ ] Валидация кода: только LLM (юзер запускает локально)

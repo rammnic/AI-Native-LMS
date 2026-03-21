@@ -74,6 +74,7 @@ class Node(Base):
     title = Column(String(500), nullable=False)
     type = Column(String(50), nullable=False)  # topic, theory, practice
     order_index = Column(Integer, default=0, nullable=False)
+    f_order = Column(Integer, default=0, nullable=False)  # Flat order: sequential lesson number within course (1, 2, 3...) - only for theory/practice, topics have 0
     content_status = Column(String(50), default="pending", nullable=False)
     content = Column(Text, nullable=True)  # Markdown content
     data = Column(JSONB, default={})  # Additional data (task, solution, tests)
@@ -158,6 +159,7 @@ class NodeResponse(BaseModel):
     title: str
     type: str
     order_index: int
+    f_order: int = 0  # Flat sequential order for lessons within course
     content_status: str
     content: Optional[str]
     data: dict

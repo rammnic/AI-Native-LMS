@@ -42,6 +42,9 @@ async def get_course_context(db: AsyncSession, course_id: str, node_id: str) -> 
     - Previous/next lessons
     - Parent topic info
     - Sibling nodes
+    - FULL content of completed lessons (for coherence)
+    - Course outline structure
+    - is_first / is_last flags
     """
     try:
         course_uuid = uuid.UUID(course_id)
@@ -59,13 +62,17 @@ async def get_course_context(db: AsyncSession, course_id: str, node_id: str) -> 
     course_settings = course.settings or {}
     language = course_settings.get("language", "ru")
     
-    # Get all nodes for this course ordered by order_index
+    # Get all nodes for this course
     nodes_result = await db.execute(
         select(Node)
         .where(Node.course_id == course_uuid)
-        .order_by(Node.order_index)
     )
-    all_nodes = nodes_result.scalars().all()
+    all_nodes = list(nodes_result.scalars().all())
+    
+    # DEBUG: Log original order
+    logger.info(f"=== DEBUG: Original node order for course {course_id} ===")
+    for n in all_nodes[:10]:
+        logger.info(f"  {n.id} | {n.type} | {n.title} | parent={n.parent_id} | order={n.order_index}")
     
     # Build node lookup and find current node
     nodes_list = [
@@ -78,6 +85,33 @@ async def get_course_context(db: AsyncSession, course_id: str, node_id: str) -> 
         }
         for n in all_nodes
     ]
+    
+    # NEW: Hierarchical sorting - topics first, then their children
+    # Get all topics (nodes without parent)
+    topics = sorted(
+        [n for n in nodes_list if n["type"] == "topic"],
+        key=lambda x: x["order_index"]
+    )
+    
+    # Build ordered list: Topic -> its children -> next Topic -> ...
+    ordered_nodes = []
+    for topic in topics:
+        ordered_nodes.append(topic)
+        # Get children of this topic, sorted by order_index
+        children = sorted(
+            [n for n in nodes_list if n["parent_id"] == topic["id"] and n["type"] in ["theory", "practice"]],
+            key=lambda x: (x["order_index"], x["id"])
+        )
+        ordered_nodes.extend(children)
+    
+    # DEBUG: Log hierarchical order
+    logger.info(f"=== DEBUG: Hierarchical node order ===")
+    for i, n in enumerate(ordered_nodes[:10]):
+        indent = "  " if n["type"] != "topic" else ""
+        logger.info(f"  {i+1}. {indent}{n['type']} | {n['title']}")
+    
+    # Update nodes_list with hierarchical order
+    nodes_list = ordered_nodes
     
     current_node = None
     current_idx = -1
@@ -94,9 +128,31 @@ async def get_course_context(db: AsyncSession, course_id: str, node_id: str) -> 
             "nodes": nodes_list,
         }
     
-    # Find previous and next lessons (theory/practice nodes)
-    prev_lesson = nodes_list[current_idx - 1] if current_idx > 0 else None
-    next_lesson = nodes_list[current_idx + 1] if current_idx < len(nodes_list) - 1 else None
+    # Find previous and next lessons (theory/practice nodes) - skip topics in navigation
+    # Previous: find last theory/practice before current_idx
+    prev_lesson = None
+    for i in range(current_idx - 1, -1, -1):
+        if nodes_list[i]["type"] in ["theory", "practice"]:
+            prev_lesson = nodes_list[i]
+            break
+    
+    # Next: find next theory/practice after current_idx
+    next_lesson = None
+    for i in range(current_idx + 1, len(nodes_list)):
+        if nodes_list[i]["type"] in ["theory", "practice"]:
+            next_lesson = nodes_list[i]
+            break
+    
+    # Determine if this is first or last lesson (only theory/practice count)
+    lesson_nodes = [n for n in nodes_list if n["type"] in ["theory", "practice"]]
+    lesson_idx = lesson_nodes.index(current_node) if current_node in lesson_nodes else -1
+    is_first = lesson_idx == 0
+    is_last = lesson_idx == len(lesson_nodes) - 1
+    
+    logger.info(f"=== DEBUG: Current lesson: {current_node['title']} (index: {current_idx}, lesson_idx: {lesson_idx}) ===")
+    logger.info(f"  prev_lesson: {prev_lesson['title'] if prev_lesson else 'None'}")
+    logger.info(f"  next_lesson: {next_lesson['title'] if next_lesson else 'None'}")
+    logger.info(f"  is_first: {is_first}, is_last: {is_last}")
     
     # Find parent topic
     parent_topic = None
@@ -112,6 +168,26 @@ async def get_course_context(db: AsyncSession, course_id: str, node_id: str) -> 
         if n["parent_id"] == current_node.get("parent_id") and n["id"] != node_id
     ]
     
+    # Collect completed lessons with CONTENT (for coherence)
+    completed_lessons = []
+    for idx, n in enumerate(nodes_list[:current_idx]):
+        if n["type"] in ["theory", "practice"]:
+            # Fetch full node to get content
+            node_result = await db.execute(select(Node).where(Node.id == uuid.UUID(n["id"])))
+            node = node_result.scalar_one_or_none()
+            if node and node.content:
+                # Take first 800 characters for context
+                content_preview = node.content[:800].replace("\n", " ").strip()
+                completed_lessons.append({
+                    "title": node.title,
+                    "content": content_preview,
+                    "type": node.type,
+                    "order_index": node.order_index
+                })
+    
+    # Build course outline structure
+    course_outline = _build_course_outline(all_nodes)
+    
     return {
         "course_title": course.title,
         "course_description": course.description or "",
@@ -122,7 +198,32 @@ async def get_course_context(db: AsyncSession, course_id: str, node_id: str) -> 
         "parent_topic": parent_topic,
         "siblings": siblings,
         "nodes": nodes_list,
+        # NEW: Extended context
+        "is_first": is_first,
+        "is_last": is_last,
+        "completed_lessons": completed_lessons,
+        "course_outline": course_outline,
+        "next_lesson_preview": next_lesson["title"] if next_lesson else None,
     }
+
+
+def _build_course_outline(all_nodes) -> list:
+    """Build course outline structure from flat node list."""
+    # Find root topics (nodes without parent or with parent of different type)
+    topics = []
+    for node in all_nodes:
+        if node.type == "topic" and not node.parent_id:
+            topic_children = [
+                {"title": n.title, "type": n.type}
+                for n in all_nodes
+                if n.parent_id == node.id
+            ]
+            topics.append({
+                "title": node.title,
+                "type": "topic",
+                "children": topic_children
+            })
+    return topics
 
 
 def build_context_summary(context: dict) -> str:
@@ -312,17 +413,23 @@ async def generate_lesson_content(
         pipeline = "lesson_theory" if content_type == "theory" else "lesson_practice"
         
         # =================================================================
-        # STEP 2: Build enhanced request with context (NEW)
+        # STEP 2: Build enhanced request with context (v2)
         # =================================================================
         enhanced_input = {
             **request.model_dump(),
-            "language": language,  # Explicit language from course settings
-            "context_summary": context_summary,  # Human-readable context
-            "context": context,  # Full context object for AI
+            # Basic context
+            "language": language,
+            "context_summary": context_summary,
             "course_title": context.get("course_title") if context else None,
-            "prev_lesson_title": context.get("prev_lesson", {}).get("title") if context else None,
-            "next_lesson_title": context.get("next_lesson", {}).get("title") if context else None,
-            "parent_topic_title": context.get("parent_topic", {}).get("title") if context else None,
+            "prev_lesson_title": context.get("prev_lesson", {}).get("title") if context and context.get("prev_lesson") else None,
+            "next_lesson_title": context.get("next_lesson", {}).get("title") if context and context.get("next_lesson") else None,
+            "parent_topic_title": context.get("parent_topic", {}).get("title") if context and context.get("parent_topic") else None,
+            # Extended context for coherence
+            "is_first": context.get("is_first", False),
+            "is_last": context.get("is_last", False),
+            "completed_lessons": context.get("completed_lessons", []),
+            "course_outline": context.get("course_outline", []),
+            "next_lesson_preview": context.get("next_lesson_preview"),
         }
         
         try:

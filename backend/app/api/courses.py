@@ -10,7 +10,7 @@ from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -19,6 +19,62 @@ from app.db.database import get_db
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
+
+
+# =============================================================================
+# F_ORDER SERVICE - Manages flat sequential lesson numbering within a course
+# =============================================================================
+
+async def recalculate_f_order(db: AsyncSession, course_id: uuid.UUID) -> None:
+    """
+    Recalculates f_order for all lessons (theory/practice) within a course.
+    Topics get f_order=0.
+    Lessons are numbered sequentially: 1, 2, 3...
+    Order follows: topics sorted by order_index, then their children (lessons) sorted by order_index.
+    """
+    from app.db.schema import Node
+    
+    # Get all nodes for this course
+    result = await db.execute(
+        select(Node)
+        .where(Node.course_id == course_id)
+        .order_by(Node.order_index, Node.id)
+    )
+    all_nodes = list(result.scalars().all())
+    
+    # Find root topics (parent_id is None)
+    root_topics = [n for n in all_nodes if n.parent_id is None and n.type == "topic"]
+    root_topics.sort(key=lambda x: (x.order_index, str(x.id)))
+    
+    # Assign f_order
+    lesson_counter = 1
+    updates = []
+    
+    for topic in root_topics:
+        # Topic gets f_order = 0 (not a lesson)
+        updates.append({"id": topic.id, "f_order": 0})
+        
+        # Get children (lessons) sorted by order_index
+        children = [
+            n for n in all_nodes 
+            if n.parent_id == topic.id and n.type in ["theory", "practice"]
+        ]
+        children.sort(key=lambda x: (x.order_index, str(x.id)))
+        
+        for child in children:
+            updates.append({"id": child.id, "f_order": lesson_counter})
+            lesson_counter += 1
+    
+    # Batch update
+    for update_data in updates:
+        await db.execute(
+            update(Node)
+            .where(Node.id == update_data["id"])
+            .values(f_order=update_data["f_order"])
+        )
+    
+    await db.commit()
+    logger.info(f"Recalculated f_order for course {course_id}: {lesson_counter - 1} lessons")
 
 
 # Pydantic models
@@ -43,6 +99,7 @@ class CourseNodeResponse(BaseModel):
     title: str
     type: str
     order_index: int
+    f_order: int = 0  # Flat sequential lesson number within course
     content_status: str
     content: Optional[str] = None
     data: dict = {}
@@ -75,10 +132,21 @@ def node_to_response(node) -> CourseNodeResponse:
         title=node.title,
         type=node.type,
         order_index=node.order_index,
+        f_order=getattr(node, 'f_order', 0),  # Default to 0 if field doesn't exist yet
         content_status=node.content_status,
         content=node.content,
         data=node.data or {},
     )
+
+
+def sort_nodes_by_order(nodes: list) -> list:
+    """Sort nodes by parent_id and order_index for consistent ordering.
+    
+    Uses secondary sort by id for stability when order_index values are equal.
+    """
+    # Convert parent_id to string to handle asyncpg.UUID objects from PostgreSQL
+    # Add id as secondary sort key for stable ordering
+    return sorted(nodes, key=lambda n: (str(n.parent_id) if n.parent_id else "", n.order_index, str(n.id)))
 
 
 # Node routes are now in a separate router to avoid conflicts
@@ -103,7 +171,7 @@ async def get_courses(
 
     response = []
     for course in courses:
-        # Build tree structure for nodes
+        # Build tree structure for nodes - SORT by order_index for consistent ordering
         nodes_dict = {str(n.id): node_to_response(n) for n in course.nodes}
         root_nodes = [n for n in course.nodes if n.parent_id is None]
         
@@ -114,7 +182,7 @@ async def get_courses(
             description=course.description,
             status=course.status,
             settings=course.settings or {},
-            nodes=[node_to_response(n) for n in course.nodes],
+            nodes=[node_to_response(n) for n in sort_nodes_by_order(course.nodes)],
             created_at=course.created_at,
             updated_at=course.updated_at,
         ))
@@ -152,7 +220,7 @@ async def get_course(
         description=course.description,
         status=course.status,
         settings=course.settings or {},
-        nodes=[node_to_response(n) for n in course.nodes],
+        nodes=[node_to_response(n) for n in sort_nodes_by_order(course.nodes)],
         created_at=course.created_at,
         updated_at=course.updated_at,
     )
@@ -250,12 +318,16 @@ async def create_node(
         title=node_data.title,
         type=node_data.type,
         order_index=node_data.order_index,
+        f_order=0,  # Will be recalculated by recalculate_f_order
         content_status="pending",
     )
 
     db.add(new_node)
     await db.commit()
     await db.refresh(new_node)
+
+    # Recalculate f_order for all nodes in this course
+    await recalculate_f_order(db, uuid.UUID(course_id))
 
     return node_to_response(new_node)
 
@@ -315,6 +387,7 @@ async def create_nodes_batch(
             title=node_data.title,
             type=node_data.type,
             order_index=node_data.order_index if node_data.order_index > 0 else idx,
+            f_order=0,  # Will be recalculated by recalculate_f_order
             content_status="pending",
         )
         db.add(new_node)
@@ -331,6 +404,9 @@ async def create_nodes_batch(
     # Refresh all nodes to get their IDs
     for node in created_nodes:
         await db.refresh(node)
+
+    # Recalculate f_order for all nodes in this course
+    await recalculate_f_order(db, uuid.UUID(course_id))
 
     logger.info(f"Batch create completed successfully")
     return CourseNodeBatchResponse(
@@ -350,6 +426,7 @@ class NodeUpdate(BaseModel):
     content: Optional[str] = None
     data: Optional[dict] = None
     content_status: Optional[str] = None
+    order_index: Optional[int] = None
 
 
 @nodes_router.get("/{node_id}", response_model=CourseNodeResponse)
@@ -419,9 +496,42 @@ async def update_node(
         node.data = node_data.data
     if node_data.content_status is not None:
         node.content_status = node_data.content_status
+    if node_data.order_index is not None:
+        node.order_index = node_data.order_index
+        # Recalculate f_order if order_index changed
+        await recalculate_f_order(db, node.course_id)
 
     await db.commit()
     await db.refresh(node)
 
     logger.info(f"Node {node_id} updated successfully")
     return node_to_response(node)
+
+
+@nodes_router.post("/{course_id}/recalculate-f-order")
+async def recalculate_course_f_order(
+    course_id: str,
+    current_user: UserResponse = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Manually recalculate f_order for all nodes in a course.
+    Use this after bulk operations or data fixes.
+    """
+    from app.db.schema import Course
+
+    # Verify course exists and user owns it
+    result = await db.execute(
+        select(Course).where(Course.id == uuid.UUID(course_id))
+    )
+    course = result.scalar_one_or_none()
+
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+
+    if str(course.author_id) != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    await recalculate_f_order(db, uuid.UUID(course_id))
+
+    return {"message": f"f_order recalculated for course {course_id}"}

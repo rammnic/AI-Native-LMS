@@ -168,6 +168,18 @@ export default function CoursePage() {
         if (parent) { parent.children = parent.children || []; parent.children.push(currentNode); }
       } else { roots.push(currentNode); }
     });
+    
+    // Sort all children by order_index recursively
+    const sortChildren = (nodeList: CourseNode[]): void => {
+      nodeList.sort((a, b) => a.order_index - b.order_index);
+      nodeList.forEach((node) => {
+        if (node.children && node.children.length > 0) {
+          sortChildren(node.children);
+        }
+      });
+    };
+    sortChildren(roots);
+    
     return roots;
   };
 
