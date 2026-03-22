@@ -39,6 +39,7 @@ export default function TheoryPage() {
   const [lesson, setLesson] = useState<LessonData | null>(null)
   const [course, setCourse] = useState<CourseData | null>(null)
   const [navigation, setNavigation] = useState<NavigationInfo>({ prevNode: null, nextNode: null, currentIndex: 0, totalLessons: 0 })
+  const [topicLessons, setTopicLessons] = useState<CourseNode[]>([])
   const [loading, setLoading] = useState(true)
   const [regenerating, setRegenerating] = useState(false)
   const [generating, setGenerating] = useState(false)
@@ -58,6 +59,25 @@ export default function TheoryPage() {
       currentIndex: currentIndex + 1,
       totalLessons: lessonNodes.length,
     })
+  }, [])
+
+  // Get lessons in the same topic (siblings)
+  const getTopicLessons = useCallback((courseData: CourseData, currentNode: CourseNode | null) => {
+    if (!currentNode) return []
+    
+    // Get all nodes for the same parent
+    const siblings = courseData.nodes.filter(n => {
+      if (n.type === "topic") return false
+      return n.parent_id === currentNode.parent_id && n.id !== currentNode.id
+    })
+    
+    // Sort siblings by order
+    siblings.sort((a, b) => a.f_order - b.f_order)
+    
+    // Add current node to show in the list
+    const currentWithSiblings = [currentNode, ...siblings].sort((a, b) => a.f_order - b.f_order)
+    
+    return currentWithSiblings
   }, [])
 
   // Navigate to previous lesson
@@ -88,6 +108,13 @@ export default function TheoryPage() {
             const courseData = await coursesApi.getById(node.course_id)
             setCourse(courseData)
             calculateNavigation(courseData, lessonId)
+            
+            // Get topic lessons (siblings)
+            const currentNode = courseData.nodes.find(n => n.id === lessonId)
+            if (currentNode) {
+              const siblings = getTopicLessons(courseData, currentNode)
+              setTopicLessons(siblings)
+            }
           } catch (courseError) {
             console.warn("Could not fetch course for navigation:", courseError)
           }
@@ -123,7 +150,6 @@ export default function TheoryPage() {
             }
           } catch (genError) {
             console.error("Error generating content:", genError)
-            // Still show the node, even if generation failed
             setLesson({
               id: node.id,
               title: node.title,
@@ -146,7 +172,6 @@ export default function TheoryPage() {
         }
       } catch (error) {
         console.error("Error fetching lesson:", error)
-        // Fallback to mock data if API fails
         setLesson({
           id: lessonId,
           title: "Lesson Content",
@@ -160,7 +185,7 @@ export default function TheoryPage() {
       }
     }
     fetchLesson()
-  }, [lessonId, calculateNavigation])
+  }, [lessonId, calculateNavigation, getTopicLessons])
 
   const handleRegenerate = async () => {
     setRegenerating(true)
@@ -217,12 +242,6 @@ export default function TheoryPage() {
               <RefreshCw className={`w-4 h-4 mr-2 ${regenerating ? "animate-spin" : ""}`} />
               Regenerate
             </Button>
-            <Link href={`/lesson/${lessonId}/practice`}>
-              <Button size="sm">
-                Go to Practice
-                <ChevronRight className="w-4 h-4 ml-1" />
-              </Button>
-            </Link>
           </div>
         </div>
       </header>
@@ -255,6 +274,38 @@ export default function TheoryPage() {
           </Button>
         </div>
       </div>
+
+      {/* Topic Lessons Section */}
+      {topicLessons.length > 1 && (
+        <div className="container mx-auto px-6 py-4 max-w-3xl">
+          <div className="p-4 bg-slate-800/50 rounded-lg border border-slate-700/50">
+            <h3 className="text-sm font-medium text-slate-400 mb-3 flex items-center gap-2">
+              <BookOpen className="w-4 h-4" />
+              Уроки темы
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {topicLessons.map(sibling => {
+                const isCurrent = sibling.id === lessonId
+                return (
+                  <Link
+                    key={sibling.id}
+                    href={`/lesson/${sibling.id}/${sibling.type}`}
+                    className={`
+                      px-3 py-1.5 rounded-full text-sm transition-colors
+                      ${isCurrent 
+                        ? "bg-violet-600 text-white" 
+                        : "bg-slate-700 text-slate-300 hover:bg-slate-600 hover:text-white"
+                      }
+                    `}
+                  >
+                    {sibling.type === "theory" ? "📖" : "💻"} {sibling.title}
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Content */}
       <main className="container mx-auto px-6 py-4 max-w-3xl">

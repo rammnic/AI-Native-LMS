@@ -4,7 +4,9 @@ import { useEffect, useState, useRef, useCallback } from "react"
 import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
 import Editor, { OnMount } from "@monaco-editor/react"
-import { ArrowLeft, Code, Play, ChevronRight, ChevronLeft, CheckCircle, XCircle, Loader2, RefreshCw } from "lucide-react"
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
+import { ArrowLeft, Code, Play, ChevronRight, ChevronLeft, CheckCircle, XCircle, Loader2, RefreshCw, BookOpen, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { SmartConsole } from "@/components/smart-console"
 import { aiApi, nodesApi, coursesApi, CourseNode } from "@/lib/api"
@@ -20,6 +22,12 @@ interface PracticeData {
   content_status: string
 }
 
+interface TheoryData {
+  id: string
+  title: string
+  content: string | null
+}
+
 interface NavigationInfo {
   prevNode: CourseNode | null
   nextNode: CourseNode | null
@@ -32,6 +40,8 @@ export default function PracticePage() {
   const router = useRouter()
   const lessonId = params.id as string
   const [practice, setPractice] = useState<PracticeData | null>(null)
+  const [relatedTheory, setRelatedTheory] = useState<TheoryData | null>(null)
+  const [showTheory, setShowTheory] = useState(false)
   const [navigation, setNavigation] = useState<NavigationInfo>({ prevNode: null, nextNode: null, currentIndex: 0, totalLessons: 0 })
   const [code, setCode] = useState("")
   const [loading, setLoading] = useState(true)
@@ -42,9 +52,7 @@ export default function PracticePage() {
   const [regenerating, setRegenerating] = useState(false)
   const editorRef = useRef<any>(null)
 
-  // Calculate navigation between lessons - using f_order for simple and correct numbering
   const calculateNavigation = useCallback((courseData: { nodes: CourseNode[] }, currentId: string) => {
-    // Filter only lessons (theory/practice) and sort by f_order
     const lessonNodes = courseData.nodes
       .filter(n => n.type === "theory" || n.type === "practice")
       .sort((a, b) => a.f_order - b.f_order)
@@ -59,7 +67,6 @@ export default function PracticePage() {
     })
   }, [])
 
-  // Navigate to previous lesson
   const goToPrev = () => {
     if (navigation.prevNode) {
       const type = navigation.prevNode.type === "theory" ? "/theory" : "/practice"
@@ -67,7 +74,6 @@ export default function PracticePage() {
     }
   }
 
-  // Navigate to next lesson
   const goToNext = () => {
     if (navigation.nextNode) {
       const type = navigation.nextNode.type === "theory" ? "/theory" : "/practice"
@@ -75,7 +81,6 @@ export default function PracticePage() {
     }
   }
 
-  // Regenerate practice content
   const handleRegenerate = async () => {
     setRegenerating(true)
     try {
@@ -104,10 +109,8 @@ export default function PracticePage() {
   useEffect(() => {
     async function fetchPractice() {
       try {
-        // Fetch node from API
         const node = await nodesApi.getById(lessonId)
         
-        // Fetch course to get all nodes for navigation
         if (node.course_id) {
           try {
             const courseData = await coursesApi.getById(node.course_id)
@@ -117,7 +120,23 @@ export default function PracticePage() {
           }
         }
         
-        // If content is pending, generate it
+        // Try to fetch related theory
+        try {
+          const theoryResponse = await fetch(`/api/v1/courses/nodes/${lessonId}/theory`)
+          if (theoryResponse.ok) {
+            const theoryData = await theoryResponse.json()
+            if (theoryData.content) {
+              setRelatedTheory({
+                id: theoryData.id,
+                title: theoryData.title,
+                content: theoryData.content,
+              })
+            }
+          }
+        } catch (theoryError) {
+          console.warn("Could not fetch related theory:", theoryError)
+        }
+        
         if (node.content_status === "pending" || !node.data?.task) {
           setGenerating(true)
           try {
@@ -292,14 +311,51 @@ export default function PracticePage() {
             <Button variant="ghost" size="sm" onClick={handleRegenerate} disabled={regenerating} className="text-slate-400">
               <RefreshCw className={`w-4 h-4 ${regenerating ? "animate-spin" : ""}`} />
             </Button>
-            <Link href={`/lesson/${lessonId}/theory`}>
-              <Button variant="secondary" size="sm">
-                Back to Theory
-              </Button>
-            </Link>
           </div>
         </div>
       </header>
+
+      {/* Theory Preview Section */}
+      {relatedTheory && (
+        <div className="border-b border-slate-800 bg-slate-900/30">
+          <button
+            onClick={() => setShowTheory(!showTheory)}
+            className="w-full container mx-auto px-6 py-3 flex items-center justify-between text-left hover:bg-slate-800/50 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <BookOpen className="w-4 h-4 text-cyan-400" />
+              <span className="text-sm font-medium">📖 {relatedTheory.title}</span>
+            </div>
+            <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${showTheory ? "rotate-180" : ""}`} />
+          </button>
+          
+          {showTheory && (
+            <div className="container mx-auto px-6 pb-4">
+              <div className="prose prose-invert prose-sm max-w-none max-h-64 overflow-y-auto">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    h1: ({ children }) => <h1 className="text-xl font-bold mb-3 text-white">{children}</h1>,
+                    h2: ({ children }) => <h2 className="text-lg font-semibold mt-4 mb-2 text-white">{children}</h2>,
+                    p: ({ children }) => <p className="text-slate-300 mb-2 text-sm leading-relaxed">{children}</p>,
+                    ul: ({ children }) => <ul className="list-disc list-inside mb-2 text-slate-300 space-y-0.5 text-sm">{children}</ul>,
+                    code: ({ children }) => <code className="bg-slate-800 px-1 py-0.5 rounded text-cyan-300 text-xs">{children}</code>,
+                    pre: ({ children }) => <pre className="bg-slate-900 p-2 rounded text-xs overflow-x-auto mb-2">{children}</pre>,
+                  }}
+                >
+                  {relatedTheory.content || "_Теория загружается..._"}
+                </ReactMarkdown>
+              </div>
+              <Link href={`/lesson/${relatedTheory.id}/theory`}>
+                <Button variant="ghost" size="sm" className="mt-2 text-slate-400 hover:text-white">
+                  Открыть теорию полностью
+                  <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+              </Link>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Task Panel */}
       {showTask && (

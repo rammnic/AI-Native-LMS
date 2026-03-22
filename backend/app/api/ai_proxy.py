@@ -261,6 +261,92 @@ def build_context_summary(context: dict) -> str:
     return "\n".join(parts)
 
 
+# =============================================================================
+# SIBLING THEORY FINDER - Finds related theory for practice generation
+# =============================================================================
+
+async def _find_sibling_theory(
+    db: AsyncSession,
+    node_id: str,
+    context: dict
+) -> Optional[Node]:
+    """
+    Find the theory sibling of a practice node in the same parent topic.
+    
+    Logic:
+    1. If current node is theory - return it
+    2. If current node is practice - find sibling theory with same parent
+    3. Look for any theory node in the same parent topic as fallback
+    """
+    try:
+        node_uuid = uuid.UUID(node_id)
+    except ValueError:
+        return None
+    
+    # Get current node
+    result = await db.execute(select(Node).where(Node.id == node_uuid))
+    node = result.scalar_one_or_none()
+    if not node:
+        return None
+    
+    # If node is theory - return it
+    if node.type == "theory":
+        return node
+    
+    # If node is practice - find sibling theory with same parent
+    if node.type == "practice" and node.parent_id:
+        siblings_result = await db.execute(
+            select(Node)
+            .where(
+                Node.parent_id == node.parent_id,
+                Node.type == "theory"
+            )
+            .order_by(Node.order_index)
+            .limit(1)
+        )
+        sibling_theory = siblings_result.scalar_one_or_none()
+        if sibling_theory:
+            logger.info(f"Found sibling theory: {sibling_theory.id} - {sibling_theory.title}")
+            return sibling_theory
+        
+        # Fallback: Look for any theory in the same course that comes before this practice
+        # This handles cases where practice might be at different hierarchy level
+        if node.course_id:
+            all_theory_result = await db.execute(
+                select(Node)
+                .where(
+                    Node.course_id == node.course_id,
+                    Node.type == "theory"
+                )
+                .order_by(Node.order_index)
+            )
+            all_theory = list(all_theory_result.scalars().all())
+            
+            # Find the theory closest to this practice in order
+            for theory in reversed(all_theory):
+                if theory.order_index <= node.order_index:
+                    logger.info(f"Found nearest theory: {theory.id} - {theory.title}")
+                    return theory
+            
+            # If no theory before, return first theory
+            if all_theory:
+                logger.info(f"Returning first theory as fallback: {all_theory[0].id}")
+                return all_theory[0]
+    
+    return None
+
+
+async def _get_node_content(db: AsyncSession, node_id: str) -> Optional[str]:
+    """Get the content of a node by ID."""
+    try:
+        node_uuid = uuid.UUID(node_id)
+        result = await db.execute(select(Node).where(Node.id == node_uuid))
+        node = result.scalar_one_or_none()
+        return node.content if node else None
+    except ValueError:
+        return None
+
+
 class CourseOutlineRequest(BaseModel):
     user_prompt: str
     difficulty: str = "intermediate"
@@ -405,6 +491,42 @@ async def generate_lesson_content(
     if context_summary:
         logger.info(f"Context summary:\n{context_summary}")
 
+    # =================================================================
+    # STEP 1.5: Auto-fetch theory_content for practice generation
+    # =================================================================
+    effective_theory_content = request.theory_content
+    
+    if content_type == "practice" and not effective_theory_content:
+        logger.info("No theory_content in request, looking for sibling theory...")
+        sibling_theory = await _find_sibling_theory(db, request.node_id, context)
+        if sibling_theory and sibling_theory.content:
+            effective_theory_content = sibling_theory.content
+            logger.info(f"Got theory_content from sibling node {sibling_theory.id}: {sibling_theory.title}")
+        else:
+            # Try to get theory content directly from the same node if it's a practice node
+            # Look for any available theory content in the course
+            logger.warning("No sibling theory found with content, trying to find any available theory...")
+            
+            # Find the first available theory node with content in the same course
+            try:
+                course_uuid = uuid.UUID(request.course_id)
+                theory_result = await db.execute(
+                    select(Node)
+                    .where(
+                        Node.course_id == course_uuid,
+                        Node.type == "theory",
+                        Node.content.isnot(None)
+                    )
+                    .order_by(Node.order_index)
+                    .limit(1)
+                )
+                first_theory = theory_result.scalar_one_or_none()
+                if first_theory and first_theory.content:
+                    effective_theory_content = first_theory.content
+                    logger.info(f"Using fallback theory content from node {first_theory.id}")
+            except Exception as e:
+                logger.warning(f"Could not find fallback theory: {e}")
+    
     # Use mock data or call AI Framework
     if AI_MOCK_ENABLED:
         normalized = MOCK_THEORY_CONTENT if content_type == "theory" else MOCK_PRACTICE_CONTENT
@@ -417,6 +539,8 @@ async def generate_lesson_content(
         # =================================================================
         enhanced_input = {
             **request.model_dump(),
+            # Use effective theory content (auto-fetched if needed)
+            "theory_content": effective_theory_content or "",
             # Basic context
             "language": language,
             "context_summary": context_summary,
@@ -431,6 +555,9 @@ async def generate_lesson_content(
             "course_outline": context.get("course_outline", []),
             "next_lesson_preview": context.get("next_lesson_preview"),
         }
+        
+        logger.info(f"Enhanced input keys: {list(enhanced_input.keys())}")
+        logger.info(f"theory_content present: {bool(effective_theory_content)}")
         
         try:
             async with httpx.AsyncClient() as client:

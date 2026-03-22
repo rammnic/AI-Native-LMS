@@ -332,6 +332,8 @@ POST /api/v1/ai/generate/structure
 | GET | /api/v1/courses/:id | Детали курса |
 | DELETE | /api/v1/courses/:id | Удалить курс |
 | POST | /api/v1/courses/:id/nodes/batch | Создать несколько нод |
+| GET | /api/v1/courses/:id/validate-structure | Валидация структуры курса |
+| POST | /api/v1/courses/:id/nodes/recalculate-f-order | Пересчёт f_order |
 
 ### Nodes
 | Метод | Путь | Описание |
@@ -443,6 +445,10 @@ DEBUG=next* npm run dev
 - [x] **Frontend build error**: добавлена зависимость `remark-gfm` в frontend/package.json для поддержки GitHub Flavored Markdown
 - [x] **Нестабильная сортировка уроков**: исправлена функция `sort_nodes_by_order` в courses.py и `calculateNavigation` в theory/practice pages — добавлена вторичная сортировка по `id` для стабильного порядка уроков (подробнее: `docs/lesson-navigation-fix.md`)
 - [x] **f_order для корректной нумерации уроков**: добавлено поле `f_order` в таблицу nodes — плоский порядковый номер урока (1, 2, 3...) в рамках курса. Topics имеют f_order=0. Автоматический пересчёт при создании/изменении узлов. API: POST `/api/v1/courses/nodes/recalculate-f-order`
+- [x] **Рекурсивный пересчёт f_order**: функция `recalculate_f_order()` теперь обрабатывает вложенные подтемы рекурсивно. Theory всегда идёт перед practice.
+- [x] **JsonTransformNode с order_index**: при трансформации JSON назначается order_index: theory = position*2 (чётные), practice = position*2+1 (нечётные).
+- [x] **Улучшенный промпт course_outline.json (v4.0.0)**: добавлены правила полноты (3-5 уроков на подтему), порядка (theory всегда перед practice), гранулярности (100 маленьких лучше чем 50 неполных).
+- [x] **Валидация структуры курса**: новый эндпоинт GET `/api/v1/courses/:id/validate-structure` — проверяет непрерывность, цельность, полноту, последовательность. Возвращает score 0-100 и рекомендации.
 - [ ] Стриминг: нужно доработать UI для плавного отображения
 - [ ] Консоль: режим Chat vs Debug нужно разделить UI
 - [ ] Валидация кода: только LLM (юзер запускает локально)
