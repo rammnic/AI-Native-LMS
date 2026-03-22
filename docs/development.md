@@ -443,7 +443,7 @@ DEBUG=next* npm run dev
 - [x] **JSON Parsing**: переведён на Structured Output (response_format: json_object) — устранены проблемы с парсингом
 - [x] **Courses API 500 error**: исправлена функция `sort_nodes_by_order` в courses.py — `asyncpg.UUID` объекты из PostgreSQL теперь корректно конвертируются в строку перед сортировкой
 - [x] **Frontend build error**: добавлена зависимость `remark-gfm` в frontend/package.json для поддержки GitHub Flavored Markdown
-- [x] **Нестабильная сортировка уроков**: исправлена функция `sort_nodes_by_order` в courses.py и `calculateNavigation` в theory/practice pages — добавлена вторичная сортировка по `id` для стабильного порядка уроков (подробнее: `docs/lesson-navigation-fix.md`)
+- [x] **Нестабильная сортировка уроков**: исправлена функция `sort_nodes_by_order` в courses.py и `calculateNavigation` в theory/practice pages — добавлена вторичная сортировка по `id` для стабильного порядка уроков
 - [x] **f_order для корректной нумерации уроков**: добавлено поле `f_order` в таблицу nodes — плоский порядковый номер урока (1, 2, 3...) в рамках курса. Topics имеют f_order=0. Автоматический пересчёт при создании/изменении узлов. API: POST `/api/v1/courses/nodes/recalculate-f-order`
 - [x] **Рекурсивный пересчёт f_order**: функция `recalculate_f_order()` теперь обрабатывает вложенные подтемы рекурсивно. Theory всегда идёт перед practice.
 - [x] **JsonTransformNode с order_index**: при трансформации JSON назначается order_index: theory = position*2 (чётные), practice = position*2+1 (нечётные).
