@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, BookOpen, Clock, Sparkles, LogOut } from "lucide-react";
+import { Plus, BookOpen, Clock, Sparkles, LogOut, User } from "lucide-react";
 import { coursesApi } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { CreateCourseModal } from "@/components/create-course-modal";
@@ -69,12 +69,15 @@ export default function DashboardPage() {
             <span className="text-xl font-bold">AI-Native LMS</span>
           </Link>
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 rounded-lg">
+            <Link 
+              href="/profile"
+              className="flex items-center gap-2 px-3 py-1.5 bg-slate-800 rounded-lg hover:bg-slate-700 transition-colors cursor-pointer"
+            >
               <div className="w-8 h-8 rounded-full bg-violet-600 flex items-center justify-center font-medium">
                 {user?.name?.[0] || "U"}
               </div>
               <span className="text-sm">{user?.name || "User"}</span>
-            </div>
+            </Link>
             <button
               onClick={handleLogout}
               className="flex items-center gap-2 px-3 py-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"

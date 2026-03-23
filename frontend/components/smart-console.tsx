@@ -22,6 +22,7 @@ interface SmartConsoleProps {
   nodeId?: string
   courseId?: string
   context?: string
+  lessonContent?: string
   onCodeRun?: (code: string) => void
 }
 
@@ -32,6 +33,7 @@ export function SmartConsole({
   nodeId,
   courseId,
   context = "",
+  lessonContent = "",
   onCodeRun,
 }: SmartConsoleProps) {
   const [mode, setMode] = useState<ConsoleMode>(controlledMode || defaultMode)
@@ -45,7 +47,7 @@ export function SmartConsole({
     },
   ])
   const [isLoading, setIsLoading] = useState(false)
-  const [isExpanded, setIsExpanded] = useState(true)
+  const [isExpanded, setIsExpanded] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
@@ -105,7 +107,7 @@ export function SmartConsole({
         setIsLoading(false)
       }
     } else {
-      // Chat mode - ask AI
+      // Chat mode - ask AI with lesson content context
       setIsLoading(true)
       
       try {
@@ -113,6 +115,7 @@ export function SmartConsole({
           question: userInput,
           context,
           node_id: nodeId,
+          lesson_content: lessonContent,
         })
         
         if (result.success) {

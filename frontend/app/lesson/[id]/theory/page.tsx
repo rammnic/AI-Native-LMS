@@ -8,7 +8,8 @@ import remarkGfm from "remark-gfm"
 import { ArrowLeft, BookOpen, RefreshCw, ChevronRight, Loader2, ChevronLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { SmartConsole } from "@/components/smart-console"
-import { aiApi, nodesApi, coursesApi, CourseNode } from "@/lib/api"
+import { aiApi, nodesApi, coursesApi, progressApi, CourseNode } from "@/lib/api"
+import { CheckCircle, Circle } from "lucide-react"
 
 interface LessonData {
   id: string
@@ -43,6 +44,8 @@ export default function TheoryPage() {
   const [loading, setLoading] = useState(true)
   const [regenerating, setRegenerating] = useState(false)
   const [generating, setGenerating] = useState(false)
+  const [isCompleted, setIsCompleted] = useState(false)
+  const [markingComplete, setMarkingComplete] = useState(false)
 
   // Calculate navigation between lessons - using f_order for simple and correct numbering
   const calculateNavigation = useCallback((courseData: CourseData, currentId: string) => {
@@ -187,6 +190,18 @@ export default function TheoryPage() {
     fetchLesson()
   }, [lessonId, calculateNavigation, getTopicLessons])
 
+  const handleMarkComplete = async () => {
+    setMarkingComplete(true)
+    try {
+      await progressApi.markComplete(lessonId)
+      setIsCompleted(true)
+    } catch (error) {
+      console.error("Error marking complete:", error)
+    } finally {
+      setMarkingComplete(false)
+    }
+  }
+
   const handleRegenerate = async () => {
     setRegenerating(true)
     try {
@@ -238,6 +253,20 @@ export default function TheoryPage() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleMarkComplete}
+              disabled={markingComplete || isCompleted}
+              className={isCompleted ? "text-emerald-400" : "text-slate-400"}
+            >
+              {isCompleted ? (
+                <CheckCircle className="w-4 h-4 mr-2 text-emerald-400" />
+              ) : (
+                <Circle className="w-4 h-4 mr-2" />
+              )}
+              {isCompleted ? "Изучено" : "Отметить изученным"}
+            </Button>
             <Button variant="secondary" size="sm" onClick={handleRegenerate} disabled={regenerating}>
               <RefreshCw className={`w-4 h-4 mr-2 ${regenerating ? "animate-spin" : ""}`} />
               Regenerate
@@ -349,6 +378,7 @@ export default function TheoryPage() {
         nodeId={lessonId}
         courseId={lesson.course_id}
         context={lesson.parent_context || ""}
+        lessonContent={lesson.content}
       />
     </div>
   )

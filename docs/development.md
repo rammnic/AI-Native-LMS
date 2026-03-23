@@ -368,7 +368,7 @@ POST /api/v1/ai/generate/structure
 ### LMS Backend
 - **Порт**: 8001
 - **JWT Expire**: 24h
-- **Курс макс. глубина**: 5 уровней
+- **Курс макс. глубина**: 3 уровня
 
 ### Frontend
 - **Порт**: 3000

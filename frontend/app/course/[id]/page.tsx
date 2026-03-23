@@ -2,17 +2,23 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
-import { ChevronRight, BookOpen, FileText, Code, Sparkles, ArrowLeft } from "lucide-react";
+import { ChevronRight, BookOpen, FileText, Code, Sparkles, ArrowLeft, Trash2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { coursesApi, aiApi, CourseNode } from "@/lib/api";
 
 export default function CoursePage() {
   const params = useParams();
+  const router = useRouter();
   const courseId = params.id as string;
   const [course, setCourse] = useState<{ id: string; title: string; description: string; nodes: CourseNode[] } | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchCourse = async () => {
     try {
@@ -31,6 +37,17 @@ export default function CoursePage() {
   useEffect(() => {
     if (courseId) fetchCourse();
   }, [courseId]);
+
+  const handleDeleteCourse = async () => {
+    setDeleting(true);
+    try {
+      await coursesApi.delete(courseId);
+      router.push("/dashboard");
+    } catch (error) {
+      console.error("Error deleting course:", error);
+      setDeleting(false);
+    }
+  };
 
   const handleGenerateStructure = async () => {
     setGenerating(true);
@@ -193,18 +210,27 @@ export default function CoursePage() {
             <Link href="/dashboard" className="p-2 hover:bg-slate-800 rounded-lg"><ArrowLeft className="w-5 h-5 text-slate-400" /></Link>
             <div><h1 className="text-lg font-semibold">{course.title}</h1><p className="text-sm text-slate-400">{course.description}</p></div>
           </div>
-          <button 
-            onClick={handleGenerateStructure}
-            disabled={generating}
-            className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 rounded-lg font-medium disabled:opacity-50"
-          >
-            {generating ? (
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <Sparkles className="w-4 h-4" />
-            )}
-            Generate More
-          </button>
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setDeleteDialogOpen(true)}
+              className="flex items-center gap-2 px-3 py-2 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-colors"
+              title="Delete course"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+            <button 
+              onClick={handleGenerateStructure}
+              disabled={generating}
+              className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 rounded-lg font-medium disabled:opacity-50"
+            >
+              {generating ? (
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Sparkles className="w-4 h-4" />
+              )}
+              Generate More
+            </button>
+          </div>
         </div>
       </header>
       <main className="container mx-auto px-6 py-8">
@@ -232,6 +258,30 @@ export default function CoursePage() {
           )}
         </div>
       </main>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Удалить курс?</DialogTitle>
+            <DialogDescription>
+              Это действие нельзя отменить. Курс "{course.title}" и все его уроки будут удалены навсегда.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setDeleteDialogOpen(false)}>
+              Отмена
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleDeleteCourse}
+              disabled={deleting}
+            >
+              {deleting ? "Удаление..." : "Удалить"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

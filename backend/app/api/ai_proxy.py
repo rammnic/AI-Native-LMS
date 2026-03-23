@@ -27,7 +27,20 @@ logger = logging.getLogger(__name__)
 AI_API_URL = os.getenv("AI_API_URL", "http://localhost:8000")
 AI_MOCK_ENABLED = os.getenv("AI_MOCK_ENABLED", "true").lower() == "true"
 
+# AI Models
+AI_COURSE_MODEL = os.getenv("AI_COURSE_MODEL", "minimax/minimax-m2.5:nitro")
+AI_MENTOR_MODEL = os.getenv("AI_MENTOR_MODEL", "minimax/minimax-m2.5:nitro")
+
+# AI Token Limits (per operation type)
+AI_MAX_TOKENS_COURSE = int(os.getenv("AI_MAX_TOKENS_COURSE", "8192"))
+AI_MAX_TOKENS_THEORY = int(os.getenv("AI_MAX_TOKENS_THEORY", "4096"))
+AI_MAX_TOKENS_PRACTICE = int(os.getenv("AI_MAX_TOKENS_PRACTICE", "4096"))
+AI_MAX_TOKENS_MENTOR = int(os.getenv("AI_MAX_TOKENS_MENTOR", "2048"))
+AI_MAX_TOKENS_CODE_VALIDATOR = int(os.getenv("AI_MAX_TOKENS_CODE_VALIDATOR", "1024"))
+
 logger.info(f"AI Proxy initialized: mock_enabled={AI_MOCK_ENABLED}, api_url={AI_API_URL}")
+logger.info(f"AI Models: course={AI_COURSE_MODEL}, mentor={AI_MENTOR_MODEL}")
+logger.info(f"AI Token Limits: course={AI_MAX_TOKENS_COURSE}, theory={AI_MAX_TOKENS_THEORY}, practice={AI_MAX_TOKENS_PRACTICE}, mentor={AI_MAX_TOKENS_MENTOR}")
 
 
 # =============================================================================
@@ -373,6 +386,7 @@ class AIChatRequest(BaseModel):
     question: str
     context: str = ""
     node_id: Optional[str] = None
+    lesson_content: Optional[str] = None
 
 
 MOCK_COURSE_OUTLINE = {
@@ -434,9 +448,13 @@ async def generate_course_structure(request: CourseOutlineRequest):
     try:
         async with httpx.AsyncClient(timeout=120.0) as client:
             logger.info(f"Calling AI Framework at {AI_API_URL}/execute")
+            # Add max_tokens to input_data
+            input_data = request.model_dump()
+            input_data["max_tokens"] = AI_MAX_TOKENS_COURSE
+            
             response = await client.post(
                 f"{AI_API_URL}/execute",
-                json={"pipeline_name": "course_outline", "input_data": request.model_dump()},
+                json={"pipeline_name": "course_outline", "input_data": input_data},
             )
             logger.info(f"AI Framework response status: {response.status_code}")
             response.raise_for_status()
@@ -558,6 +576,10 @@ async def generate_lesson_content(
         
         logger.info(f"Enhanced input keys: {list(enhanced_input.keys())}")
         logger.info(f"theory_content present: {bool(effective_theory_content)}")
+        
+        # Add max_tokens based on content_type
+        max_tokens = AI_MAX_TOKENS_THEORY if content_type == "theory" else AI_MAX_TOKENS_PRACTICE
+        enhanced_input["max_tokens"] = max_tokens
         
         try:
             async with httpx.AsyncClient() as client:

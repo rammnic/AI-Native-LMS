@@ -173,11 +173,9 @@ export function CreateCourseModal({ open, onOpenChange, onCourseCreated }: Creat
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                  <SelectContent>
                       <SelectItem value="2">2 levels</SelectItem>
                       <SelectItem value="3">3 levels</SelectItem>
-                      <SelectItem value="4">4 levels</SelectItem>
-                      <SelectItem value="5">5 levels</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

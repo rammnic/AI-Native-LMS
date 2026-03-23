@@ -122,6 +122,20 @@ class UserSubscription(Base):
     user = relationship("User", back_populates="subscriptions")
 
 
+class InviteCode(Base):
+    """Invite codes for closed beta/registration."""
+    __tablename__ = "invite_codes"
+
+    id = Column(PGUUID(as_uuid=True), primary_key=True, default=uuid4)
+    code = Column(String(20), unique=True, nullable=False, index=True)
+    created_by = Column(PGUUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    uses_count = Column(Integer, default=0, nullable=False)
+    max_uses = Column(Integer, default=10, nullable=False)
+    is_active = Column(Boolean, default=True, nullable=False)
+    expires_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+
 # Pydantic schemas for API
 class UserCreate(BaseModel):
     email: str

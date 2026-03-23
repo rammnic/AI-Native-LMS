@@ -35,6 +35,7 @@ class UserCreate(BaseModel):
     email: str
     password: str
     name: Optional[str] = None
+    invite_code: Optional[str] = None
 
     @field_validator('email')
     @classmethod
@@ -131,7 +132,47 @@ async def get_current_user(
 @router.post("/register", response_model=TokenResponse)
 async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
     """Register a new user."""
-    from app.db.schema import User
+    from app.db.schema import User, InviteCode
+
+    # Check if invite code is required and valid
+    invite_code_required = os.getenv("INVITE_CODE_REQUIRED", "false").lower() == "true"
+    
+    if invite_code_required:
+        if not user_data.invite_code:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invite code is required for registration",
+            )
+        
+        # Validate invite code
+        result = await db.execute(
+            select(InviteCode).where(InviteCode.code == user_data.invite_code)
+        )
+        invite = result.scalar_one_or_none()
+        
+        if not invite:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid invite code",
+            )
+        
+        if not invite.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invite code is no longer active",
+            )
+        
+        if invite.expires_at and invite.expires_at < datetime.utcnow():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invite code has expired",
+            )
+        
+        if invite.uses_count >= invite.max_uses:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invite code has reached maximum uses",
+            )
 
     # Check if email already exists
     result = await db.execute(select(User).where(User.email == user_data.email))
