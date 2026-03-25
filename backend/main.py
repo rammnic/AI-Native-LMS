@@ -9,7 +9,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import auth, courses, progress, ai_proxy
+from app.api import auth, courses, progress, ai_proxy, admin, prompts
 from app.db.database import init_db
 
 # Configure logging
@@ -56,6 +56,8 @@ app.include_router(courses.router, prefix="/api/v1/courses", tags=["courses"])
 app.include_router(courses.nodes_router, prefix="/api/v1/courses/nodes", tags=["nodes"])
 app.include_router(progress.router, prefix="/api/v1/progress", tags=["progress"])
 app.include_router(ai_proxy.router, prefix="/api/v1/ai", tags=["ai"])
+app.include_router(admin.router, prefix="/api/v1/admin", tags=["admin"])
+app.include_router(prompts.router, prefix="/api/v1/prompts", tags=["prompts"])
 
 logger.info("All routes registered successfully")
 

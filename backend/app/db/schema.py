@@ -96,6 +96,7 @@ class UserProgress(Base):
     node_id = Column(PGUUID(as_uuid=True), ForeignKey("nodes.id", ondelete="CASCADE"), nullable=False)
     course_id = Column(PGUUID(as_uuid=True), ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
     status = Column(String(50), default="in_progress", nullable=False)
+    score = Column(Integer, nullable=True)
     completed_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)

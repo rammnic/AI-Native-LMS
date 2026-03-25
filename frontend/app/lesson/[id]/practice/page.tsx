@@ -92,7 +92,7 @@ export default function PracticePage() {
         const data = response.data as { task: string; solution: string; tests: Array<{ input: string; expected_output: string }> }
         setPractice(prev => prev ? {
           ...prev,
-          task: data.task || "# No task available",
+          task: data.task || "# Задание недоступно",
           solution: data.solution || "",
           tests: data.tests || [],
           content_status: "generated",
@@ -100,7 +100,7 @@ export default function PracticePage() {
         setCode(data.solution || "")
       }
     } catch (error) {
-      console.error("Error regenerating practice:", error)
+      console.error("Ошибка регенерации практики:", error)
     } finally {
       setRegenerating(false)
     }
@@ -116,11 +116,10 @@ export default function PracticePage() {
             const courseData = await coursesApi.getById(node.course_id)
             calculateNavigation(courseData, lessonId)
           } catch (courseError) {
-            console.warn("Could not fetch course for navigation:", courseError)
+            console.warn("Не удалось загрузить курс для навигации:", courseError)
           }
         }
         
-        // Try to fetch related theory
         try {
           const theoryResponse = await fetch(`/api/v1/courses/nodes/${lessonId}/theory`)
           if (theoryResponse.ok) {
@@ -134,7 +133,7 @@ export default function PracticePage() {
             }
           }
         } catch (theoryError) {
-          console.warn("Could not fetch related theory:", theoryError)
+          console.warn("Не удалось загрузить связанную теорию:", theoryError)
         }
         
         if (node.content_status === "pending" || !node.data?.task) {
@@ -149,7 +148,7 @@ export default function PracticePage() {
               setPractice({
                 id: node.id,
                 title: node.title,
-                task: data.task || "# No task available",
+                task: data.task || "# Задание недоступно",
                 solution: data.solution || "",
                 tests: data.tests || [],
                 course_id: node.course_id || "",
@@ -161,7 +160,7 @@ export default function PracticePage() {
               setPractice({
                 id: node.id,
                 title: node.title,
-                task: node.data?.task as string || "# No task available",
+                task: node.data?.task as string || "# Задание недоступно",
                 solution: node.data?.solution as string || "",
                 tests: (node.data?.tests as Array<{ input: string; expected_output: string }>) || [],
                 course_id: node.course_id || "",
@@ -171,11 +170,11 @@ export default function PracticePage() {
               setCode((node.data?.solution as string) || "")
             }
           } catch (genError) {
-            console.error("Error generating practice:", genError)
+            console.error("Ошибка генерации практики:", genError)
             setPractice({
               id: node.id,
               title: node.title,
-              task: node.data?.task as string || "# Task generation failed\n\nPlease try again later or regenerate.",
+              task: node.data?.task as string || "# Ошибка генерации задания\n\nПопробуйте позже или выполните регенерацию.",
               solution: node.data?.solution as string || "",
               tests: (node.data?.tests as Array<{ input: string; expected_output: string }>) || [],
               course_id: node.course_id || "",
@@ -203,11 +202,11 @@ export default function PracticePage() {
           setCode(solutionData || "")
         }
       } catch (error) {
-        console.error("Error fetching practice:", error)
+        console.error("Ошибка загрузки практики:", error)
         setPractice({
           id: lessonId,
-          title: "Practice",
-          task: "# Unable to load task\n\nPlease try again later.",
+          title: "Практика",
+          task: "# Не удалось загрузить задание\n\nПопробуйте позже.",
           solution: "",
           tests: [],
           course_id: "",
@@ -243,14 +242,14 @@ export default function PracticePage() {
         const data = response.data as { is_correct: boolean; output?: string; message?: string }
         setResult({
           success: data.is_correct,
-          message: data.message || (data.is_correct ? "Correct!" : "Not quite right"),
+          message: data.message || (data.is_correct ? "Верно!" : "Не совсем правильно"),
           output: data.output,
         })
       }
     } catch (error) {
       setResult({
         success: false,
-        message: error instanceof Error ? error.message : "Unknown error",
+        message: error instanceof Error ? error.message : "Неизвестная ошибка",
       })
     } finally {
       setRunning(false)
@@ -262,19 +261,18 @@ export default function PracticePage() {
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-500"></div>
-          <p className="text-slate-400">{generating ? "Generating practice content..." : "Loading..."}</p>
+          <p className="text-slate-400">{generating ? "Генерация практического задания..." : "Загрузка..."}</p>
         </div>
       </div>
     )
   }
 
   if (!practice) {
-    return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400">Practice not found</div>
+    return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400">Практика не найдена</div>
   }
 
   return (
     <div className="min-h-screen bg-slate-950 text-white pb-80">
-      {/* Header */}
       <header className="border-b border-slate-800 bg-slate-900/50 sticky top-0 z-30">
         <div className="container mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -285,7 +283,7 @@ export default function PracticePage() {
               <Code className="w-5 h-5 text-emerald-400" />
               <div>
                 <h1 className="text-lg font-semibold">{practice.title}</h1>
-                <p className="text-sm text-slate-400">Practice • {navigation.currentIndex}/{navigation.totalLessons}</p>
+                <p className="text-sm text-slate-400">Практика • {navigation.currentIndex}/{navigation.totalLessons}</p>
               </div>
             </div>
           </div>
@@ -303,7 +301,7 @@ export default function PracticePage() {
               ) : (
                 <Play className="w-4 h-4 mr-2" />
               )}
-              Run Code
+              Запустить код
             </Button>
             <Button variant="ghost" size="sm" onClick={goToNext} disabled={!navigation.nextNode} className="text-slate-400">
               <ChevronRight className="w-4 h-4" />
@@ -315,7 +313,6 @@ export default function PracticePage() {
         </div>
       </header>
 
-      {/* Theory Preview Section */}
       {relatedTheory && (
         <div className="border-b border-slate-800 bg-slate-900/30">
           <button
@@ -357,17 +354,16 @@ export default function PracticePage() {
         </div>
       )}
 
-      {/* Task Panel */}
       {showTask && (
         <div className="border-b border-slate-800 bg-slate-900/30">
           <div className="container mx-auto px-6 py-4">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-medium text-slate-400 uppercase tracking-wider">Task</h2>
+              <h2 className="text-sm font-medium text-slate-400 uppercase tracking-wider">Задание</h2>
               <button
                 onClick={() => setShowTask(false)}
                 className="text-xs text-slate-500 hover:text-slate-300"
               >
-                Hide
+                Скрыть
               </button>
             </div>
             <div className="prose prose-invert prose-sm max-w-none">
@@ -377,7 +373,6 @@ export default function PracticePage() {
         </div>
       )}
 
-      {/* Result Banner */}
       {result && (
         <div className={`border-b ${result.success ? "border-emerald-500/50 bg-emerald-900/20" : "border-red-500/50 bg-red-900/20"}`}>
           <div className="container mx-auto px-6 py-3 flex items-center gap-3">
@@ -391,14 +386,13 @@ export default function PracticePage() {
             </span>
             {result.output && (
               <span className="text-slate-400 text-sm ml-2">
-                Output: {result.output}
+                Вывод: {result.output}
               </span>
             )}
           </div>
         </div>
       )}
 
-      {/* Code Editor */}
       <div className="h-[calc(100vh-200px)] min-h-[400px]">
         <Editor
           height="100%"
@@ -420,17 +414,15 @@ export default function PracticePage() {
         />
       </div>
 
-      {/* Show Task Toggle */}
       {!showTask && (
         <button
           onClick={() => setShowTask(true)}
           className="fixed top-20 right-6 z-20 px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-300 hover:bg-slate-700 transition-colors"
         >
-          Show Task
+          Показать задание
         </button>
       )}
 
-      {/* Smart Console */}
       <SmartConsole
         mode="run"
         nodeId={lessonId}

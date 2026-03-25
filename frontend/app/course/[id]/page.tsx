@@ -7,7 +7,8 @@ import { useParams } from "next/navigation";
 import { ChevronRight, BookOpen, FileText, Code, Sparkles, ArrowLeft, Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { coursesApi, aiApi, CourseNode } from "@/lib/api";
+import { coursesApi, aiApi, progressApi, CourseNode, CourseProgressResponse } from "@/lib/api";
+import { CheckCircle, Circle } from "lucide-react";
 
 export default function CoursePage() {
   const params = useParams();
@@ -19,6 +20,7 @@ export default function CoursePage() {
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [courseProgress, setCourseProgress] = useState<CourseProgressResponse | null>(null);
 
   const fetchCourse = async () => {
     try {
@@ -28,7 +30,7 @@ export default function CoursePage() {
         setExpandedNodes(new Set(data.nodes.map((n: CourseNode) => n.id)));
       }
     } catch (error) {
-      console.error("Error fetching course:", error);
+      console.error("Ошибка загрузки курса:", error);
     } finally {
       setLoading(false);
     }
@@ -38,13 +40,25 @@ export default function CoursePage() {
     if (courseId) fetchCourse();
   }, [courseId]);
 
+  useEffect(() => {
+    async function loadProgress() {
+      try {
+        const progress = await progressApi.getCourseProgress(courseId);
+        setCourseProgress(progress);
+      } catch (error) {
+        console.error("Ошибка загрузки прогресса:", error);
+      }
+    }
+    loadProgress();
+  }, [courseId]);
+
   const handleDeleteCourse = async () => {
     setDeleting(true);
     try {
       await coursesApi.delete(courseId);
       router.push("/dashboard");
     } catch (error) {
-      console.error("Error deleting course:", error);
+      console.error("Ошибка удаления курса:", error);
       setDeleting(false);
     }
   };
@@ -52,7 +66,6 @@ export default function CoursePage() {
   const handleGenerateStructure = async () => {
     setGenerating(true);
     try {
-      // Generate new structure via AI
       const result = await aiApi.generateStructure({
         user_prompt: `Expand course: ${course?.title}`,
         difficulty: "intermediate",
@@ -66,7 +79,6 @@ export default function CoursePage() {
         };
         
         if (data.structure && data.structure.length > 0) {
-          // Flatten structure and save nodes - preserve order_index from AI
           const flattenStructure = (
             structure: Array<{ id: string; title: string; type: string; order_index?: number; children?: Array<{ id: string; title: string; type: string; order_index?: number; content: unknown }> }>,
             parentId: string | null = null,
@@ -75,7 +87,6 @@ export default function CoursePage() {
           ): Array<{ id: string; title: string; type: "topic" | "theory" | "practice"; parent_id: string | null; order_index: number }> => {
             structure.forEach((item, idx) => {
               const newId = crypto.randomUUID();
-              // Preserve order from AI structure, fallback to sibling index
               const orderIndex = item.order_index ?? idx;
               
               nodes.push({
@@ -98,11 +109,10 @@ export default function CoursePage() {
           }
         }
         
-        // Refresh course data
         await fetchCourse();
       }
     } catch (error) {
-      console.error("Error generating structure:", error);
+      console.error("Ошибка генерации структуры:", error);
     } finally {
       setGenerating(false);
     }
@@ -135,14 +145,19 @@ export default function CoursePage() {
   }
 
   if (!course) {
-    return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400">Course not found</div>;
+    return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400">Курс не найден</div>;
   }
+
+  const isNodeCompleted = (nodeId: string): boolean => {
+    if (!courseProgress?.progress) return false;
+    return courseProgress.progress.some(p => p.node_id === nodeId && p.status === "completed");
+  };
 
   const renderNode = (node: CourseNode, depth: number = 0) => {
     const hasChildren = node.children && node.children.length > 0;
     const isExpanded = expandedNodes.has(node.id);
+    const isCompleted = isNodeCompleted(node.id);
 
-    // Determine navigation target for lesson nodes
     const getLessonLink = () => {
       if (node.type === "theory") return `/lesson/${node.id}/theory`;
       if (node.type === "practice") return `/lesson/${node.id}/practice`;
@@ -166,8 +181,9 @@ export default function CoursePage() {
           {!hasChildren && <div className="w-4" />}
           {getNodeIcon(node.type)}
           <span className="flex-1">{node.title}</span>
-          {node.type === "theory" && <span className="text-xs px-2 py-1 rounded bg-cyan-500/20 text-cyan-300">Theory</span>}
-          {node.type === "practice" && <span className="text-xs px-2 py-1 rounded bg-emerald-500/20 text-emerald-300">Practice</span>}
+          {isCompleted && <CheckCircle className="w-4 h-4 text-emerald-400" />}
+          {node.type === "theory" && <span className="text-xs px-2 py-1 rounded bg-cyan-500/20 text-cyan-300">Теория</span>}
+          {node.type === "practice" && <span className="text-xs px-2 py-1 rounded bg-emerald-500/20 text-emerald-300">Практика</span>}
         </Link>
         {hasChildren && isExpanded && <div>{node.children!.map((child) => renderNode(child, depth + 1))}</div>}
       </div>
@@ -186,7 +202,6 @@ export default function CoursePage() {
       } else { roots.push(currentNode); }
     });
     
-    // Sort all children by order_index recursively
     const sortChildren = (nodeList: CourseNode[]): void => {
       nodeList.sort((a, b) => a.order_index - b.order_index);
       nodeList.forEach((node) => {
@@ -214,7 +229,7 @@ export default function CoursePage() {
             <button 
               onClick={() => setDeleteDialogOpen(true)}
               className="flex items-center gap-2 px-3 py-2 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-colors"
-              title="Delete course"
+              title="Удалить курс"
             >
               <Trash2 className="w-4 h-4" />
             </button>
@@ -228,18 +243,18 @@ export default function CoursePage() {
               ) : (
                 <Sparkles className="w-4 h-4" />
               )}
-              Generate More
+              Добавить контент
             </button>
           </div>
         </div>
       </header>
       <main className="container mx-auto px-6 py-8">
         <div className="max-w-2xl">
-          <h2 className="text-xl font-semibold mb-6">Course Structure</h2>
+          <h2 className="text-xl font-semibold mb-6">Структура курса</h2>
           {treeNodes.length > 0 ? <div className="space-y-1">{treeNodes.map((node) => renderNode(node))}</div> : (
             <div className="text-center py-12">
               <BookOpen className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-              <p className="text-slate-400 mb-4">No content yet</p>
+              <p className="text-slate-400 mb-4">Контент пока отсутствует</p>
               <button 
                 onClick={handleGenerateStructure}
                 disabled={generating}
@@ -248,10 +263,10 @@ export default function CoursePage() {
                 {generating ? (
                   <>
                     <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" />
-                    Generating...
+                    Генерация...
                   </>
                 ) : (
-                  "Generate Course Structure"
+                  "Сгенерировать структуру курса"
                 )}
               </button>
             </div>
@@ -259,7 +274,6 @@ export default function CoursePage() {
         </div>
       </main>
 
-      {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>

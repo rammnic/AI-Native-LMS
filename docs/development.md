@@ -240,6 +240,18 @@ AI-Native-LMS/
 | score | INTEGER | Оценка |
 | completed_at | TIMESTAMP | Дата завершения |
 
+### Таблица invite_codes
+| Колонка | Тип | Описание |
+|---------|-----|----------|
+| id | UUID | Primary key |
+| code | VARCHAR(20) | Уникальный код (LC-XXXX-XXXX-XXXX) |
+| created_by | UUID | Foreign key на users (создатель) |
+| uses_count | INTEGER | Текущее использований |
+| max_uses | INTEGER | Максимум использований |
+| is_active | BOOLEAN | Активен ли код |
+| expires_at | TIMESTAMP | Срок действия (nullable) |
+| created_at | TIMESTAMP | Дата создания |
+
 ## JSON-контракт: Генерация курса
 
 ### Запрос: Создание структуры курса
@@ -323,6 +335,16 @@ POST /api/v1/ai/generate/structure
 | POST | /api/v1/auth/register | Регистрация |
 | POST | /api/v1/auth/login | Вход |
 | GET | /api/v1/auth/me | Текущий пользователь |
+| GET | /api/v1/auth/config | Публичная конфигурация (invite_code_required) |
+
+### Admin (требуется авторизация + ADMIN_EMAIL)
+| Метод | Путь | Описание |
+|-------|------|----------|
+| GET | /api/v1/admin/config | Получить конфигурацию |
+| GET | /api/v1/admin/invite-codes | Список всех кодов |
+| POST | /api/v1/admin/invite-codes | Создать код |
+| PATCH | /api/v1/admin/invite-codes/:id | Обновить код |
+| DELETE | /api/v1/admin/invite-codes/:id | Деактивировать код |
 
 ### Courses
 | Метод | Путь | Описание |
@@ -346,6 +368,14 @@ POST /api/v1/ai/generate/structure
 |-------|------|----------|
 | GET | /api/v1/progress/:course_id | Прогресс курса |
 | POST | /api/v1/progress/:node_id/complete | Отметить завершённым |
+
+### Prompts (шаблоны курсов)
+| Метод | Путь | Описание |
+|-------|------|----------|
+| GET | /api/v1/prompts | Список всех промптов |
+| GET | /api/v1/prompts/:id | Конкретный промпт |
+| GET | /api/v1/prompts/career-paths | Карьерные пути |
+| GET | /api/v1/prompts/categories/list | Категории |
 
 ### AI
 | Метод | Путь | Описание |
@@ -453,6 +483,16 @@ DEBUG=next* npm run dev
 - [ ] Консоль: режим Chat vs Debug нужно разделить UI
 - [ ] Валидация кода: только LLM (юзер запускает локально)
 - [ ] Монетизация: заглушки UI без логики
+- [x] **Система Invite Codes**: добавлена регистрация по приглашениям
+  - Backend: `/api/v1/admin/*` endpoints для управления кодами
+  - Frontend: `/admin` страница для админов, поле в форме регистрации
+  - Env: `INVITE_CODE_REQUIRED=true` + `ADMIN_EMAIL=admin@example.com`
+- [x] **Career Paths и Templates**: добавлена система готовых промптов
+  - Backend: `/api/v1/prompts/*` endpoints
+  - Frontend: `/prompts` страница с интерактивной картой карьерного роста (React Flow)
+  - Frontend: `PromptSelector` компонент для выбора шаблона
+  - Frontend: `CreateCourseModal` — таб "Templates"
+  - docs/prompts/ — 12 готовых промптов для разных уровней и направлений
 
 ## Ссылки
 

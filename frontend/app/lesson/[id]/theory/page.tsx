@@ -8,7 +8,7 @@ import remarkGfm from "remark-gfm"
 import { ArrowLeft, BookOpen, RefreshCw, ChevronRight, Loader2, ChevronLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { SmartConsole } from "@/components/smart-console"
-import { aiApi, nodesApi, coursesApi, progressApi, CourseNode } from "@/lib/api"
+import { aiApi, nodesApi, coursesApi, progressApi, CourseNode, ProgressResponse } from "@/lib/api"
 import { CheckCircle, Circle } from "lucide-react"
 
 interface LessonData {
@@ -47,9 +47,21 @@ export default function TheoryPage() {
   const [isCompleted, setIsCompleted] = useState(false)
   const [markingComplete, setMarkingComplete] = useState(false)
 
-  // Calculate navigation between lessons - using f_order for simple and correct numbering
+  useEffect(() => {
+    async function loadProgress() {
+      try {
+        const progress = await progressApi.getNodeProgress(lessonId)
+        if (progress.status === "completed") {
+          setIsCompleted(true)
+        }
+      } catch (error) {
+        console.error("Ошибка загрузки прогресса:", error)
+      }
+    }
+    loadProgress()
+  }, [lessonId])
+
   const calculateNavigation = useCallback((courseData: CourseData, currentId: string) => {
-    // Filter only lessons (theory/practice) and sort by f_order
     const lessonNodes = courseData.nodes
       .filter(n => n.type === "theory" || n.type === "practice")
       .sort((a, b) => a.f_order - b.f_order)
@@ -64,26 +76,21 @@ export default function TheoryPage() {
     })
   }, [])
 
-  // Get lessons in the same topic (siblings)
   const getTopicLessons = useCallback((courseData: CourseData, currentNode: CourseNode | null) => {
     if (!currentNode) return []
     
-    // Get all nodes for the same parent
     const siblings = courseData.nodes.filter(n => {
       if (n.type === "topic") return false
       return n.parent_id === currentNode.parent_id && n.id !== currentNode.id
     })
     
-    // Sort siblings by order
     siblings.sort((a, b) => a.f_order - b.f_order)
     
-    // Add current node to show in the list
     const currentWithSiblings = [currentNode, ...siblings].sort((a, b) => a.f_order - b.f_order)
     
     return currentWithSiblings
   }, [])
 
-  // Navigate to previous lesson
   const goToPrev = () => {
     if (navigation.prevNode) {
       const type = navigation.prevNode.type === "theory" ? "/theory" : "/practice"
@@ -91,7 +98,6 @@ export default function TheoryPage() {
     }
   }
 
-  // Navigate to next lesson
   const goToNext = () => {
     if (navigation.nextNode) {
       const type = navigation.nextNode.type === "theory" ? "/theory" : "/practice"
@@ -102,28 +108,24 @@ export default function TheoryPage() {
   useEffect(() => {
     async function fetchLesson() {
       try {
-        // Fetch node from API
         const node = await nodesApi.getById(lessonId)
         
-        // Fetch course to get all nodes for navigation
         if (node.course_id) {
           try {
             const courseData = await coursesApi.getById(node.course_id)
             setCourse(courseData)
             calculateNavigation(courseData, lessonId)
             
-            // Get topic lessons (siblings)
             const currentNode = courseData.nodes.find(n => n.id === lessonId)
             if (currentNode) {
               const siblings = getTopicLessons(courseData, currentNode)
               setTopicLessons(siblings)
             }
           } catch (courseError) {
-            console.warn("Could not fetch course for navigation:", courseError)
+            console.warn("Не удалось загрузить курс для навигации:", courseError)
           }
         }
         
-        // If content is pending, generate it
         if (node.content_status === "pending" || !node.content) {
           setGenerating(true)
           try {
@@ -136,7 +138,7 @@ export default function TheoryPage() {
               setLesson({
                 id: node.id,
                 title: node.title,
-                content: data.content || "# Content pending generation...",
+                content: data.content || "# Контент ожидает генерации...",
                 course_id: node.course_id || "",
                 parent_context: node.data?.parent_context as string || "",
                 content_status: "generated",
@@ -145,18 +147,18 @@ export default function TheoryPage() {
               setLesson({
                 id: node.id,
                 title: node.title,
-                content: node.content || "# No content available",
+                content: node.content || "# Контент недоступен",
                 course_id: node.course_id || "",
                 parent_context: node.data?.parent_context as string || "",
                 content_status: node.content_status,
               })
             }
           } catch (genError) {
-            console.error("Error generating content:", genError)
+            console.error("Ошибка генерации контента:", genError)
             setLesson({
               id: node.id,
               title: node.title,
-              content: node.content || "# Content generation failed\n\nPlease try again later or regenerate.",
+              content: node.content || "# Ошибка генерации контента\n\nПопробуйте позже или выполните регенерацию.",
               course_id: node.course_id || "",
               parent_context: node.data?.parent_context as string || "",
               content_status: "pending",
@@ -174,13 +176,13 @@ export default function TheoryPage() {
           })
         }
       } catch (error) {
-        console.error("Error fetching lesson:", error)
+        console.error("Ошибка загрузки урока:", error)
         setLesson({
           id: lessonId,
-          title: "Lesson Content",
+          title: "Содержание урока",
           course_id: "",
           parent_context: "",
-          content: "# Unable to load content\n\nPlease try again later.",
+          content: "# Не удалось загрузить контент\n\nПопробуйте позже.",
           content_status: "pending",
         })
       } finally {
@@ -196,7 +198,7 @@ export default function TheoryPage() {
       await progressApi.markComplete(lessonId)
       setIsCompleted(true)
     } catch (error) {
-      console.error("Error marking complete:", error)
+      console.error("Ошибка отметки о прохождении:", error)
     } finally {
       setMarkingComplete(false)
     }
@@ -214,7 +216,7 @@ export default function TheoryPage() {
         setLesson((prev) => prev ? { ...prev, content: data.content } : null)
       }
     } catch (error) {
-      console.error("Error regenerating:", error)
+      console.error("Ошибка регенерации:", error)
     } finally {
       setRegenerating(false)
     }
@@ -225,19 +227,18 @@ export default function TheoryPage() {
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-500"></div>
-          <p className="text-slate-400">{generating ? "Generating theory content..." : "Loading..."}</p>
+          <p className="text-slate-400">{generating ? "Генерация теоретического материала..." : "Загрузка..."}</p>
         </div>
       </div>
     )
   }
 
   if (!lesson) {
-    return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400">Lesson not found</div>
+    return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-400">Урок не найден</div>
   }
 
   return (
     <div className="min-h-screen bg-slate-950 text-white pb-80">
-      {/* Header */}
       <header className="border-b border-slate-800 bg-slate-900/50 sticky top-0 z-30">
         <div className="container mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -248,7 +249,7 @@ export default function TheoryPage() {
               <BookOpen className="w-5 h-5 text-cyan-400" />
               <div>
                 <h1 className="text-lg font-semibold">{lesson.title}</h1>
-                <p className="text-sm text-slate-400">Theory • {navigation.currentIndex}/{navigation.totalLessons}</p>
+                <p className="text-sm text-slate-400">Теория • {navigation.currentIndex}/{navigation.totalLessons}</p>
               </div>
             </div>
           </div>
@@ -269,13 +270,12 @@ export default function TheoryPage() {
             </Button>
             <Button variant="secondary" size="sm" onClick={handleRegenerate} disabled={regenerating}>
               <RefreshCw className={`w-4 h-4 mr-2 ${regenerating ? "animate-spin" : ""}`} />
-              Regenerate
+              Регенерировать
             </Button>
           </div>
         </div>
       </header>
 
-      {/* Navigation between lessons */}
       <div className="container mx-auto px-6 py-4 max-w-3xl">
         <div className="flex items-center justify-between">
           <Button 
@@ -285,7 +285,7 @@ export default function TheoryPage() {
             className="text-slate-400 hover:text-white"
           >
             <ChevronLeft className="w-4 h-4 mr-1" />
-            {navigation.prevNode?.title || "Previous"}
+            {navigation.prevNode?.title || "Предыдущий"}
           </Button>
           
           <span className="text-sm text-slate-500">
@@ -298,13 +298,12 @@ export default function TheoryPage() {
             disabled={!navigation.nextNode}
             className="text-slate-400 hover:text-white"
           >
-            {navigation.nextNode?.title || "Next"}
+            {navigation.nextNode?.title || "Следующий"}
             <ChevronRight className="w-4 h-4 ml-1" />
           </Button>
         </div>
       </div>
 
-      {/* Topic Lessons Section */}
       {topicLessons.length > 1 && (
         <div className="container mx-auto px-6 py-4 max-w-3xl">
           <div className="p-4 bg-slate-800/50 rounded-lg border border-slate-700/50">
@@ -336,7 +335,6 @@ export default function TheoryPage() {
         </div>
       )}
 
-      {/* Content */}
       <main className="container mx-auto px-6 py-4 max-w-3xl">
         <article className="prose prose-invert prose-slate max-w-none">
           <ReactMarkdown
@@ -373,7 +371,6 @@ export default function TheoryPage() {
         </article>
       </main>
 
-      {/* Smart Console */}
       <SmartConsole
         nodeId={lessonId}
         courseId={lesson.course_id}

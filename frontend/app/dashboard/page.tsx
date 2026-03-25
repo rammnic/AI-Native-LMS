@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Plus, BookOpen, Clock, Sparkles, LogOut, User } from "lucide-react";
-import { coursesApi } from "@/lib/api";
+import { coursesApi, progressApi, CourseProgressResponse } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { CreateCourseModal } from "@/components/create-course-modal";
 
@@ -12,6 +12,7 @@ export default function DashboardPage() {
   const { user, logout, isAuthenticated } = useAuth();
   const router = useRouter();
   const [courses, setCourses] = useState<Array<{ id: string; title: string; description: string; status: string }>>([]);
+  const [courseProgress, setCourseProgress] = useState<Record<string, CourseProgressResponse>>({});
   const [loading, setLoading] = useState(true);
   const [createModalOpen, setCreateModalOpen] = useState(false);
 
@@ -28,7 +29,7 @@ export default function DashboardPage() {
         const coursesData = await coursesApi.getAll();
         setCourses(coursesData);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Ошибка загрузки данных:", error);
       } finally {
         setLoading(false);
       }
@@ -36,8 +37,6 @@ export default function DashboardPage() {
     if (isAuthenticated) {
       fetchData();
     } else if (!loading) {
-      // User is not authenticated and AuthContext has finished loading
-      // Set loading to false to avoid infinite spinner
       setLoading(false);
     }
   }, [isAuthenticated, loading]);
@@ -48,8 +47,39 @@ export default function DashboardPage() {
   };
 
   const handleCourseCreated = (courseId: string) => {
-    // Refresh courses list
     coursesApi.getAll().then(setCourses).catch(console.error);
+  };
+
+  useEffect(() => {
+    async function loadProgress() {
+      const progressPromises = courses.map(async (course) => {
+        try {
+          const progress = await progressApi.getCourseProgress(course.id);
+          return { courseId: course.id, progress };
+        } catch {
+          return { courseId: course.id, progress: null };
+        }
+      });
+
+      const results = await Promise.all(progressPromises);
+      const progressMap: Record<string, CourseProgressResponse> = {};
+      results.forEach(({ courseId, progress }) => {
+        if (progress) {
+          progressMap[courseId] = progress;
+        }
+      });
+      setCourseProgress(progressMap);
+    }
+
+    if (courses.length > 0) {
+      loadProgress();
+    }
+  }, [courses]);
+
+  const getProgressPercent = (courseId: string): number => {
+    const progress = courseProgress[courseId];
+    if (!progress || progress.total_count === 0) return 0;
+    return Math.round((progress.completed_count / progress.total_count) * 100);
   };
 
   if (loading) {
@@ -76,7 +106,7 @@ export default function DashboardPage() {
               <div className="w-8 h-8 rounded-full bg-violet-600 flex items-center justify-center font-medium">
                 {user?.name?.[0] || "U"}
               </div>
-              <span className="text-sm">{user?.name || "User"}</span>
+              <span className="text-sm">{user?.name || "Пользователь"}</span>
             </Link>
             <button
               onClick={handleLogout}
@@ -92,15 +122,15 @@ export default function DashboardPage() {
       <main className="container mx-auto px-6 py-12">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
-            <p className="text-slate-400">Welcome back!</p>
+            <h1 className="text-3xl font-bold mb-2">Панель управления</h1>
+            <p className="text-slate-400">С возвращением!</p>
           </div>
           <button 
             onClick={() => setCreateModalOpen(true)}
             className="flex items-center gap-2 px-6 py-3 bg-violet-600 hover:bg-violet-700 rounded-xl font-medium"
           >
             <Plus className="w-5 h-5" />
-            Create New Course
+            Создать новый курс
           </button>
         </div>
 
@@ -112,7 +142,7 @@ export default function DashboardPage() {
               </div>
               <div>
                 <p className="text-3xl font-bold">{courses.length}</p>
-                <p className="text-slate-400">Active Courses</p>
+                <p className="text-slate-400">Активных курсов</p>
               </div>
             </div>
           </div>
@@ -123,7 +153,7 @@ export default function DashboardPage() {
               </div>
               <div>
                 <p className="text-3xl font-bold">12</p>
-                <p className="text-slate-400">Lessons Completed</p>
+                <p className="text-slate-400">Уроков пройдено</p>
               </div>
             </div>
           </div>
@@ -133,14 +163,14 @@ export default function DashboardPage() {
                 <Sparkles className="w-6 h-6 text-cyan-400" />
               </div>
               <div>
-                <p className="text-3xl font-bold">5h</p>
-                <p className="text-slate-400">Learning Time</p>
+                <p className="text-3xl font-bold">5ч</p>
+                <p className="text-slate-400">Время обучения</p>
               </div>
             </div>
           </div>
         </div>
 
-        <h2 className="text-xl font-semibold mb-6">Your Courses</h2>
+        <h2 className="text-xl font-semibold mb-6">Ваши курсы</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {courses.map((course) => (
             <Link
@@ -155,8 +185,16 @@ export default function DashboardPage() {
               </div>
               <h3 className="text-lg font-semibold mb-2">{course.title}</h3>
               <p className="text-slate-400 text-sm mb-4">{course.description}</p>
-              <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
-                <div className="h-full w-1/3 bg-violet-500 rounded-full"></div>
+              <div className="flex items-center gap-3">
+                <div className="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-violet-500 rounded-full transition-all duration-300"
+                    style={{ width: `${getProgressPercent(course.id)}%` }}
+                  ></div>
+                </div>
+                <span className="text-xs text-slate-400 w-10 text-right">
+                  {getProgressPercent(course.id)}%
+                </span>
               </div>
             </Link>
           ))}
@@ -165,7 +203,7 @@ export default function DashboardPage() {
             className="p-6 rounded-2xl border-2 border-dashed border-slate-800 hover:border-violet-500/50 transition-colors flex flex-col items-center justify-center gap-3 min-h-[200px]"
           >
             <Plus className="w-6 h-6 text-slate-400" />
-            <span className="text-slate-400">Create new course</span>
+            <span className="text-slate-400">Создать новый курс</span>
           </button>
         </div>
       </main>

@@ -8,7 +8,7 @@ import { useAuth } from "@/lib/auth-context";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, register } = useAuth();
+  const { login, register, inviteCodeRequired } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -16,6 +16,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [inviteCode, setInviteCode] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +27,7 @@ export default function LoginPage() {
       if (isLogin) {
         await login(email, password);
       } else {
-        await register(email, password, name);
+        await register(email, password, name, inviteCodeRequired ? inviteCode : undefined);
       }
       router.push("/dashboard");
     } catch (err) {
@@ -95,6 +96,25 @@ export default function LoginPage() {
               />
             </div>
 
+            {!isLogin && inviteCodeRequired && (
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Пригласительный код
+                </label>
+                <input
+                  type="text"
+                  value={inviteCode}
+                  onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                  placeholder="LC-XXXX-XXXX-XXXX"
+                  className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 focus:border-violet-500 focus:outline-none transition-colors font-mono"
+                  required
+                />
+                <p className="mt-1 text-xs text-slate-500">
+                  Введите код приглашения для регистрации
+                </p>
+              </div>
+            )}
+
             {error && (
               <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
                 {error}
@@ -116,6 +136,7 @@ export default function LoginPage() {
               onClick={() => {
                 setIsLogin(!isLogin);
                 setError("");
+                setInviteCode("");
               }}
               className="text-violet-400 hover:text-violet-300 text-sm transition-colors"
             >

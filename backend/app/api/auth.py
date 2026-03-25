@@ -14,7 +14,7 @@ from jose import JWTError, jwt
 import bcrypt
 import re
 from pydantic import BaseModel, field_validator
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database import get_db
@@ -76,6 +76,11 @@ class TokenResponse(BaseModel):
     user: UserResponse
 
 
+class AuthConfigResponse(BaseModel):
+    """Public auth configuration for frontend."""
+    invite_code_required: bool
+
+
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against a hash."""
     return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
@@ -127,6 +132,17 @@ async def get_current_user(
         name=user.name,
         created_at=user.created_at,
     )
+
+
+@router.get("/config", response_model=AuthConfigResponse)
+async def get_auth_config():
+    """
+    Get public auth configuration for frontend.
+    This endpoint is public (no auth required).
+    Returns whether invite code is required for registration.
+    """
+    invite_code_required = os.getenv("INVITE_CODE_REQUIRED", "false").lower() == "true"
+    return AuthConfigResponse(invite_code_required=invite_code_required)
 
 
 @router.post("/register", response_model=TokenResponse)
@@ -193,6 +209,15 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
     )
 
     db.add(new_user)
+    
+    # Increment invite code usage counter if invite code was used
+    if invite_code_required and user_data.invite_code:
+        await db.execute(
+            update(InviteCode)
+            .where(InviteCode.code == user_data.invite_code)
+            .values(uses_count=InviteCode.uses_count + 1)
+        )
+    
     await db.commit()
     await db.refresh(new_user)
 

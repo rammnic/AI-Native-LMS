@@ -29,6 +29,7 @@ services:
       DATABASE_URL: postgresql+asyncpg://lms_user:lms_password@postgres:5432/ai_lms
       JWT_SECRET: ${JWT_SECRET:-dev-secret-key-change-in-production}
       INVITE_CODE_REQUIRED: ${INVITE_CODE_REQUIRED:-false}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
       AI_API_URL: http://ai-framework:8000
       AI_MOCK_ENABLED: ${AI_MOCK_ENABLED:-true}
       AI_COURSE_MODEL: ${AI_COURSE_MODEL:-minimax/minimax-m2.5:nitro}
@@ -40,6 +41,8 @@ services:
       AI_MAX_TOKENS_CODE_VALIDATOR: ${AI_MAX_TOKENS_CODE_VALIDATOR:-1024}
     ports:
       - "8001:8001"
+    volumes:
+      - ./docs/prompts:/app/docs/prompts:ro
     depends_on:
       postgres:
         condition: service_healthy

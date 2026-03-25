@@ -42,7 +42,7 @@ export function SmartConsole({
     {
       id: "welcome",
       type: "system",
-      content: "Smart Console ready. Switch between Chat and Run modes to interact with AI.",
+      content: "Умная консоль готова. Переключайтесь между режимами Чат и Запуск для взаимодействия с ИИ.",
       timestamp: new Date(),
     },
   ])
@@ -79,9 +79,8 @@ export function SmartConsole({
     addMessage("user", userInput)
 
     if (activeMode === "run") {
-      // Run mode - validate code
       setIsLoading(true)
-      addMessage("system", "Running code validation...")
+      addMessage("system", "Запуск проверки кода...")
       
       try {
         const result = await aiApi.validateCode({
@@ -93,21 +92,20 @@ export function SmartConsole({
         if (result.success) {
           const data = result.data as { is_correct: boolean; output?: string; message?: string }
           if (data.is_correct) {
-            addMessage("system", `✅ ${data.message || "Code is correct!"}`)
+            addMessage("system", `✅ ${data.message || "Код верный!"}`)
           } else {
-            addMessage("system", `❌ ${data.message || "Code has issues"}`)
+            addMessage("system", `❌ ${data.message || "Код имеет ошибки"}`)
           }
           if (data.output) {
-            addMessage("log", `Output: ${data.output}`)
+            addMessage("log", `Вывод: ${data.output}`)
           }
         }
       } catch (error) {
-        addMessage("system", `Error: ${error instanceof Error ? error.message : "Unknown error"}`)
+        addMessage("system", `Ошибка: ${error instanceof Error ? error.message : "Неизвестная ошибка"}`)
       } finally {
         setIsLoading(false)
       }
     } else {
-      // Chat mode - ask AI with lesson content context
       setIsLoading(true)
       
       try {
@@ -123,11 +121,11 @@ export function SmartConsole({
           if (data.answer && data.answer.trim()) {
             addMessage("ai", data.answer)
           } else {
-            addMessage("system", "AI returned an empty response. Please try again.")
+            addMessage("system", "ИИ вернул пустой ответ. Попробуйте ещё раз.")
           }
         }
       } catch (error) {
-        addMessage("system", `Error: ${error instanceof Error ? error.message : "Unknown error"}`)
+        addMessage("system", `Ошибка: ${error instanceof Error ? error.message : "Неизвестная ошибка"}`)
       } finally {
         setIsLoading(false)
       }
@@ -169,7 +167,6 @@ export function SmartConsole({
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-40 bg-slate-900 border-t border-slate-800">
-      {/* Mode Toggle */}
       <div className="flex items-center gap-2 px-4 py-2 border-b border-slate-800">
         <button
           onClick={() => handleModeSwitch("chat")}
@@ -180,7 +177,7 @@ export function SmartConsole({
           }`}
         >
           <MessageSquare className="w-4 h-4" />
-          Chat
+          Чат
         </button>
         <button
           onClick={() => handleModeSwitch("run")}
@@ -191,7 +188,7 @@ export function SmartConsole({
           }`}
         >
           <Terminal className="w-4 h-4" />
-          Run
+          Запуск
         </button>
         <div className="flex-1" />
         <button
@@ -202,7 +199,6 @@ export function SmartConsole({
         </button>
       </div>
 
-      {/* Messages */}
       {isExpanded && (
         <div className="h-64 overflow-y-auto px-4 py-3 space-y-2">
           {messages.map((msg) => (
@@ -217,14 +213,13 @@ export function SmartConsole({
           {isLoading && (
             <div className="flex items-center gap-2 text-slate-400">
               <Loader2 className="w-4 h-4 animate-spin" />
-              <span className="text-sm">AI is thinking...</span>
+              <span className="text-sm">ИИ думает...</span>
             </div>
           )}
           <div ref={messagesEndRef} />
         </div>
       )}
 
-      {/* Input */}
       {isExpanded && (
         <div className="px-4 pb-4">
           <div className="flex gap-2">
@@ -233,7 +228,7 @@ export function SmartConsole({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={activeMode === "run" ? "Write your code here..." : "Ask AI a question..."}
+              placeholder={activeMode === "run" ? "Напишите ваш код здесь..." : "Задайте вопрос ИИ..."}
               className="min-h-[60px] max-h-[120px]"
               disabled={isLoading}
             />
@@ -248,7 +243,7 @@ export function SmartConsole({
             </Button>
           </div>
           <p className="text-xs text-slate-500 mt-2">
-            Press Enter to send • Shift+Enter for new line
+            Enter для отправки • Shift+Enter для новой строки
           </p>
         </div>
       )}
