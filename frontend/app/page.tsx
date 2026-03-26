@@ -31,9 +31,9 @@ export default function Home() {
             <span className="text-sm">Обучение с поддержкой ИИ</span>
           </div>
           <h1 className="text-5xl md:text-6xl font-bold mb-6">
-            Учитесь с{" "}
+            Учитесь по своей программе с{" "}
             <span className="bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">
-              интеллектуальным ИИ
+              полной поддержкой ИИ-наставника
             </span>
           </h1>
           <p className="text-xl text-slate-400 mb-10 max-w-2xl mx-auto">

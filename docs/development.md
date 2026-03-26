@@ -458,41 +458,11 @@ curl -X POST http://localhost:8000/execute \
 DEBUG=next* npm run dev
 ```
 
-## known Issues / TODO
+## См. также
 
-- [x] Select component: исправлено управление видимостью dropdown (открыт/закрыт)
-- [x] Frontend: настроен dev-режим с hot-reload в Docker
-- [x] Аутентификация: добавлена страница /login, AuthProvider, middleware
-- [x] AI Pipeline: исправлена проблема с пустым курсом при создании (добавлены JsonParseNode, JsonTransformNode, ExtractCourseMetadataNode)
-- [x] Генерация контента: исправлено сохранение в БД (ai_proxy.py теперь сохраняет content/data после генерации)
-- [x] **Исправлена ошибка шаблонизатора в lesson_theory.json**: Jinja2 не поддерживает синтаксис Handlebars (`{{#if}}`), исправлено на `{% if %}` / `{% endif %}`
-- [x] **Исправлен возврат контента**: после генерации AI Framework данные теперь корректно сохраняются в БД и возвращаются на фронтенд
-- [x] **Добавлено детальное логирование**: ai_proxy.py теперь логирует полный ответ AI Framework для отладки
-- [x] Контракт AI proxy ↔ pipelines: нормализованы keys для real AI (lesson_theory/lesson_practice/ai_mentor)
-- [x] Nodes API: добавлен PATCH endpoint для обновления ноды
-- [x] **JSON Parsing**: переведён на Structured Output (response_format: json_object) — устранены проблемы с парсингом
-- [x] **Courses API 500 error**: исправлена функция `sort_nodes_by_order` в courses.py — `asyncpg.UUID` объекты из PostgreSQL теперь корректно конвертируются в строку перед сортировкой
-- [x] **Frontend build error**: добавлена зависимость `remark-gfm` в frontend/package.json для поддержки GitHub Flavored Markdown
-- [x] **Нестабильная сортировка уроков**: исправлена функция `sort_nodes_by_order` в courses.py и `calculateNavigation` в theory/practice pages — добавлена вторичная сортировка по `id` для стабильного порядка уроков
-- [x] **f_order для корректной нумерации уроков**: добавлено поле `f_order` в таблицу nodes — плоский порядковый номер урока (1, 2, 3...) в рамках курса. Topics имеют f_order=0. Автоматический пересчёт при создании/изменении узлов. API: POST `/api/v1/courses/nodes/recalculate-f-order`
-- [x] **Рекурсивный пересчёт f_order**: функция `recalculate_f_order()` теперь обрабатывает вложенные подтемы рекурсивно. Theory всегда идёт перед practice.
-- [x] **JsonTransformNode с order_index**: при трансформации JSON назначается order_index: theory = position*2 (чётные), practice = position*2+1 (нечётные).
-- [x] **Улучшенный промпт course_outline.json (v4.0.0)**: добавлены правила полноты (3-5 уроков на подтему), порядка (theory всегда перед practice), гранулярности (100 маленьких лучше чем 50 неполных).
-- [x] **Валидация структуры курса**: новый эндпоинт GET `/api/v1/courses/:id/validate-structure` — проверяет непрерывность, цельность, полноту, последовательность. Возвращает score 0-100 и рекомендации.
-- [ ] Стриминг: нужно доработать UI для плавного отображения
-- [ ] Консоль: режим Chat vs Debug нужно разделить UI
-- [ ] Валидация кода: только LLM (юзер запускает локально)
-- [ ] Монетизация: заглушки UI без логики
-- [x] **Система Invite Codes**: добавлена регистрация по приглашениям
-  - Backend: `/api/v1/admin/*` endpoints для управления кодами
-  - Frontend: `/admin` страница для админов, поле в форме регистрации
-  - Env: `INVITE_CODE_REQUIRED=true` + `ADMIN_EMAIL=admin@example.com`
-- [x] **Career Paths и Templates**: добавлена система готовых промптов
-  - Backend: `/api/v1/prompts/*` endpoints
-  - Frontend: `/prompts` страница с интерактивной картой карьерного роста (React Flow)
-  - Frontend: `PromptSelector` компонент для выбора шаблона
-  - Frontend: `CreateCourseModal` — таб "Templates"
-  - docs/prompts/ — 12 готовых промптов для разных уровней и направлений
+- [`plan.md`](./plan.md) — план разработки, история изменений, TODO
+- [`testing.md`](./testing.md) — чеклист тестирования
+- [`devops.md`](./devops.md) — руководство по развёртыванию
 
 ## Ссылки
 
